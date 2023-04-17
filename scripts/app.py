@@ -5,6 +5,10 @@ import os
 #from insert_json import upload_json
 
 app = Flask(__name__)
+@app.route("/hello")
+def hello_world():
+    return "<p>Hello, World!</p>"
+
 @app.route('/', methods=['GET', 'PUT'])
 def upload_file():
     result = ''
