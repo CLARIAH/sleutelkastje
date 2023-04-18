@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+   <head>
+<title>Add new app</title>
+   </head>
+   <body>
+    <h2>Add new app to sleutelkastje</h2>
+    <form method=post enctype=multipart/form-data>
+        <label for="app">app:</label>
+        <input type="text" id="app" value="{{request.form['app']}}"/><br/>
+        <label for="credentials">credentials:</label>
+        <input type="text" id="credentials" value="request.form['credentials']}}"/><br/>
+        <label for="redirect">redirect URL:</label>
+        <input type="text" value="{{request.form['app']}}"/><br/>
+        <button type="submit">Submit</button>
+    </form>
+   </body>
+</html>
