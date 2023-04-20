@@ -9,8 +9,8 @@ app = Flask(__name__)
 def hello_world():
     return "<p>Hello, World!</p>"
 
-@app.route('/add/', methods=['GET','POST'])
-def add_app():
+@app.route('/add/<app>', methods=['GET','POST'])
+def add_app(app):
     result = ''
     app = ''
     cred = ''
@@ -24,7 +24,7 @@ def add_app():
     return response
 
 @app.route('/find/<app>', methods=['GET'])
-def geet_app(app):
+def get_app(app):
     result = ''
     filename = ''
     response = make_response(render_template('get.html',result=result),200)
