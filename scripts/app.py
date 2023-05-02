@@ -35,7 +35,10 @@ def add_app(app):
         appl = request.form['app']
         cred = request.form['credentials']
         url = request.form['redirect']
-        # 
+        # add app to database
+        cur.execute('INSERT INTO application(mnemonic, credentials, redirect) VALUES (%s, %s, %s)',
+            (appl,cred,url))
+        conn.commit()
         return make_response(render_template('succes.html',result=appl),200)
     return response
 
@@ -50,6 +53,32 @@ def get_app(app):
         # reponse code ?
         response = make_response(render_template('get.html',result=app),201)
     return response
+
+@app.route('/invite/<app>/<person>', methods=['POST'])
+def invite(app,person):
+    cur.execute("SELECT _id FROM application WHERE mnemonic = %s",(app,))
+    res = cur.fetchone()
+    cur.execute('INSERT INTO invitation(uuid, app) VALUES (%s, %s)',
+            (person, res))
+    conn.commit()
+    response = make_response(render_template('invite.html',person=person,app=app),200)
+    return response
+
+@app.route('/accept/<invite>', methods=['POST'])
+def accept(invite):
+    stderr(f'invite: {invite}')
+    stderr(f'invite: {invite.__class__}')
+    cur.execute("SELECT uuid,app FROM invitation WHERE _id = %s",(invite,))
+    uuid,appl = cur.fetchone()
+    cur.execute("SELECT mnemonic FROM application WHERE _id = %s",(appl,))
+    application = cur.fetchone()
+    cur.execute('UPDATE users SET app = %s WHERE _id = %s',
+            (appl,uuid,))
+    cur.execute('DELETE FROM invitation WHERE _id = %s',(invite,))
+    conn.commit()
+    response = make_response(render_template('accepted.html',person=uuid,app=app),200)
+    return response
+
 
 def stderr(text,nl='\n'):
     sys.stderr.write(f'{text}{nl}')
