@@ -56,7 +56,7 @@ def get_app(app):
 
 @app.route('/invite/<app>/<person>', methods=['POST'])
 def invite(app,person):
-    cur.execute("SELECT _id FROM application WHERE mnemonic = %s",(app,))
+    cur.execute("SELECT _id FROM application WHERE mnemonic = %s",[app])
     res = cur.fetchone()
     cur.execute('INSERT INTO invitation(uuid, app) VALUES (%s, %s)',
             (person, res))
@@ -66,17 +66,22 @@ def invite(app,person):
 
 @app.route('/accept/<invite>', methods=['POST'])
 def accept(invite):
-    stderr(f'invite: {invite}')
-    stderr(f'invite: {invite.__class__}')
-    cur.execute("SELECT uuid,app FROM invitation WHERE _id = %s",(invite,))
+    cur.execute("SELECT uuid,app FROM invitation WHERE _id = %s",[invite])
     uuid,appl = cur.fetchone()
-    cur.execute("SELECT mnemonic FROM application WHERE _id = %s",(appl,))
+    cur.execute("SELECT mnemonic FROM application WHERE _id = %s",[appl])
     application = cur.fetchone()
     cur.execute('UPDATE users SET app = %s WHERE _id = %s',
             (appl,uuid,))
-    cur.execute('DELETE FROM invitation WHERE _id = %s',(invite,))
+    cur.execute('DELETE FROM invitation WHERE _id = %s',[invite])
     conn.commit()
     response = make_response(render_template('accepted.html',person=uuid,app=app),200)
+    return response
+
+@app.route('/user/<usr>', methods=['POST'])
+def add_user(usr):
+    cur.execute('INSERT INTO users(user_info) VALUES (%s)',[usr])
+    conn.commit()
+    response = make_response(render_template('new_user.html',usr=usr),200)
     return response
 
 
