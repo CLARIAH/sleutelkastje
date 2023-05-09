@@ -21,11 +21,15 @@ app.config.update({'OIDC_REDIRECT_URI': 'https://aboutme.diginfra.net/oauth2/red
 
 @app.route("/hello")
 def hello_world():
+    if not check_credentials(usr=eppn):
+        return make_response(render_template('not_allowed.html'),404)
     return "<p>Hello, World!</p>"
 
 
 @app.route('/add/<app>', methods=['GET','POST'])
 def add_app(app):
+    if not check_credentials(usr=eppn):
+        return make_response(render_template('not_allowed.html'),404)
     result = ''
     appl = ''
     cred = ''
@@ -45,6 +49,8 @@ def add_app(app):
 
 @app.route('/find/<app>', methods=['GET'])
 def get_app(app):
+    if not check_credentials(usr=eppn):
+        return make_response(render_template('not_allowed.html'),404)
     result = ''
     filename = ''
     response = make_response(render_template('get.html',result=result),200)
@@ -56,6 +62,8 @@ def get_app(app):
 
 @app.route('/invite/<app>/<person>', methods=['POST'])
 def invite(app,person):
+    if not check_credentials(usr=eppn):
+        return make_response(render_template('not_allowed.html'),404)
     cur.execute("SELECT _id FROM application WHERE mnemonic = %s",[app])
     res = cur.fetchone()
     cur.execute('INSERT INTO invitation(uuid, app) VALUES (%s, %s)',
@@ -66,6 +74,8 @@ def invite(app,person):
 
 @app.route('/accept/<invite>', methods=['POST'])
 def accept(invite):
+    if not check_credentials(usr=eppn):
+        return make_response(render_template('not_allowed.html'),404)
     cur.execute("SELECT uuid,app FROM invitation WHERE _id = %s",[invite])
     uuid,appl = cur.fetchone()
     cur.execute("SELECT mnemonic FROM application WHERE _id = %s",[appl])
@@ -79,6 +89,8 @@ def accept(invite):
 
 @app.route('/user/<usr>', methods=['POST'])
 def add_user(usr):
+    if not check_credentials(usr=eppn):
+        return make_response(render_template('not_allowed.html'),404)
     cur.execute('INSERT INTO users(user_info) VALUES (%s)',[usr])
     conn.commit()
     response = make_response(render_template('new_user.html',usr=usr),200)
@@ -86,11 +98,19 @@ def add_user(usr):
 
 @app.route('/<app>/func=<eppn>', methods=['POST'])
 def add_func(app,eppn):
+    if not check_credentials(usr=eppn):
+        return make_response(render_template('not_allowed.html'),404)
     cur.execute('UPDATE application SET funcPerson = %s WHERE mnemonic = %s',[eppn,app])
     conn.commit()
     response = make_response(render_template('new_func.html',app=app,func=eppn),200)
     return response
 
+def check_credentials(usr='',role='',func=''):
+    # check credentials and
+    # if OK:
+    return True
+    # if not OK:
+    # return False
 
 def stderr(text,nl='\n'):
     sys.stderr.write(f'{text}{nl}')
