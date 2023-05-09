@@ -84,6 +84,13 @@ def add_user(usr):
     response = make_response(render_template('new_user.html',usr=usr),200)
     return response
 
+@app.route('/<app>/func=<eppn>', methods=['POST'])
+def add_func(app,eppn):
+    cur.execute('UPDATE application SET funcPerson = %s WHERE mnemonic = %s',[eppn,app])
+    conn.commit()
+    response = make_response(render_template('new_func.html',app=app,func=eppn),200)
+    return response
+
 
 def stderr(text,nl='\n'):
     sys.stderr.write(f'{text}{nl}')
