@@ -17,9 +17,12 @@ from flask_pyoidc.user_session import UserSession
 app = Flask(__name__)
 auth = HTTPBasicAuth()
 
+app.config.update({'OIDC_REDIRECT_URI': 'https://aboutme.diginfra.net/oauth2/redirect',
+                   'SECRET_KEY': 'dev_key',  # make sure to change this!!
+                   'PERMANENT_SESSION_LIFETIME': datetime.timedelta(days=7).total_seconds(),
+                   'DEBUG': True})
+
 users = {
-    "john": generate_password_hash("hello"),
-    "susan": generate_password_hash("bye"),
     "sysop": generate_password_hash("striktgeheim")
 }
 
@@ -29,24 +32,15 @@ def verify_password(username, password):
             check_password_hash(users.get(username), password):
         return username
 
-app.config.update({'OIDC_REDIRECT_URI': 'https://aboutme.diginfra.net/oauth2/redirect',
-                   'SECRET_KEY': 'dev_key',  # make sure to change this!!
-                   'PERMANENT_SESSION_LIFETIME': datetime.timedelta(days=7).total_seconds(),
-                   'DEBUG': True})
-
 @app.route("/hello")
 @auth.login_required
 def hello_world():
-#    if not check_credentials(usr=eppn):
-#        return make_response(render_template('not_allowed.html'),404)
     return "Hello, {}!".format(auth.current_user())
 
 
 @app.route('/add/<app>', methods=['GET','POST'])
 @auth.login_required
 def add_app(app):
-    #    if not check_credentials(usr=eppn):
-#        return make_response(render_template('not_allowed.html'),404)
     result = ''
     appl = ''
     cred = ''
@@ -66,8 +60,6 @@ def add_app(app):
 
 @app.route('/find/<app>', methods=['GET'])
 def get_app(app):
-#    if not check_credentials(usr=eppn):
-#        return make_response(render_template('not_allowed.html'),404)
     result = ''
     filename = ''
     response = make_response(render_template('get.html',result=result),200)
@@ -79,8 +71,6 @@ def get_app(app):
 
 @app.route('/invite/<app>/<person>', methods=['POST'])
 def invite(app,person):
-#    if not check_credentials(usr=eppn):
-#        return make_response(render_template('not_allowed.html'),404)
     cur.execute("SELECT _id FROM application WHERE mnemonic = %s",[app])
     res = cur.fetchone()
     cur.execute('INSERT INTO invitation(uuid, app) VALUES (%s, %s)',
@@ -114,20 +104,12 @@ def add_user(usr):
     return response
 
 @app.route('/<app>/func=<eppn>', methods=['POST'])
+@auth.login_required
 def add_func(app,eppn):
-    if not check_credentials(usr=eppn):
-        return make_response(render_template('not_allowed.html'),404)
     cur.execute('UPDATE application SET funcPerson = %s WHERE mnemonic = %s',[eppn,app])
     conn.commit()
     response = make_response(render_template('new_func.html',app=app,func=eppn),200)
     return response
-
-def check_credentials(usr='',role='',func=''):
-    # check credentials and
-    # if OK:
-    return True
-    # if not OK:
-    # return False
 
 def stderr(text,nl='\n'):
     sys.stderr.write(f'{text}{nl}')
