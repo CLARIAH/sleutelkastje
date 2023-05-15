@@ -3,16 +3,31 @@ from config import config
 import datetime
 import flask
 from flask import Flask, Response, render_template, request, flash, redirect, url_for, make_response, jsonify
+from flask_httpauth import HTTPBasicAuth
 import logging
 import os
 import psycopg2
 import sys
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from flask_pyoidc import OIDCAuthentication
 from flask_pyoidc.provider_configuration import ProviderConfiguration, ClientMetadata
 from flask_pyoidc.user_session import UserSession
 
 app = Flask(__name__)
+auth = HTTPBasicAuth()
+
+users = {
+    "john": generate_password_hash("hello"),
+    "susan": generate_password_hash("bye"),
+    "sysop": generate_password_hash("striktgeheim")
+}
+
+@auth.verify_password
+def verify_password(username, password):
+    if username in users and \
+            check_password_hash(users.get(username), password):
+        return username
 
 app.config.update({'OIDC_REDIRECT_URI': 'https://aboutme.diginfra.net/oauth2/redirect',
                    'SECRET_KEY': 'dev_key',  # make sure to change this!!
@@ -20,16 +35,18 @@ app.config.update({'OIDC_REDIRECT_URI': 'https://aboutme.diginfra.net/oauth2/red
                    'DEBUG': True})
 
 @app.route("/hello")
+@auth.login_required
 def hello_world():
-    if not check_credentials(usr=eppn):
-        return make_response(render_template('not_allowed.html'),404)
-    return "<p>Hello, World!</p>"
+#    if not check_credentials(usr=eppn):
+#        return make_response(render_template('not_allowed.html'),404)
+    return "Hello, {}!".format(auth.current_user())
 
 
 @app.route('/add/<app>', methods=['GET','POST'])
+@auth.login_required
 def add_app(app):
-    if not check_credentials(usr=eppn):
-        return make_response(render_template('not_allowed.html'),404)
+    #    if not check_credentials(usr=eppn):
+#        return make_response(render_template('not_allowed.html'),404)
     result = ''
     appl = ''
     cred = ''
@@ -49,8 +66,8 @@ def add_app(app):
 
 @app.route('/find/<app>', methods=['GET'])
 def get_app(app):
-    if not check_credentials(usr=eppn):
-        return make_response(render_template('not_allowed.html'),404)
+#    if not check_credentials(usr=eppn):
+#        return make_response(render_template('not_allowed.html'),404)
     result = ''
     filename = ''
     response = make_response(render_template('get.html',result=result),200)
@@ -62,8 +79,8 @@ def get_app(app):
 
 @app.route('/invite/<app>/<person>', methods=['POST'])
 def invite(app,person):
-    if not check_credentials(usr=eppn):
-        return make_response(render_template('not_allowed.html'),404)
+#    if not check_credentials(usr=eppn):
+#        return make_response(render_template('not_allowed.html'),404)
     cur.execute("SELECT _id FROM application WHERE mnemonic = %s",[app])
     res = cur.fetchone()
     cur.execute('INSERT INTO invitation(uuid, app) VALUES (%s, %s)',
