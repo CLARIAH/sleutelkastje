@@ -38,9 +38,10 @@ def hello_world():
     return "Hello, {}!".format(auth.current_user())
 
 
-@app.route('/add/<app>', methods=['GET','POST'])
+@app.route('/add/appl=<app>,cred=<cred>,redir=<url>', methods=['POST'])
 @auth.login_required
-def add_app(app):
+def add_app(app,cred,url):
+    '''
     result = ''
     appl = ''
     cred = ''
@@ -50,12 +51,14 @@ def add_app(app):
         appl = request.form['app']
         cred = request.form['credentials']
         url = request.form['redirect']
+'''
         # add app to database
-        cur.execute('INSERT INTO application(mnemonic, credentials, redirect) VALUES (%s, %s, %s)',
-            (appl,cred,url))
-        conn.commit()
-        return make_response(render_template('succes.html',result=appl),200)
-    return response
+    cur.execute('INSERT INTO application(mnemonic, credentials, redirect) VALUES (%s, %s, %s)',
+            (app,cred,url))
+    conn.commit()
+    # if succesful:
+    return make_response(render_template('succes.html',result=app),200)
+#    return response
 
 
 @app.route('/find/<app>', methods=['GET'])
