@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from config import config
 import datetime
 import flask
 from flask import Flask, Response, render_template, request, flash, redirect, url_for, make_response, jsonify
@@ -123,7 +122,13 @@ if __name__ == "__main__":
     cur = None
     try:
         # read database configuration
-        params = config()
+        params = { 'host' : os.environ.get('DATABASE_HOST', 'localhost'),
+                'port' : int(os.environ.get('DATABASE_PORT', 5432)),
+                'database' : os.environ.get('DATABASE_DB', 'sleutelkastje'),
+                'user' : os.environ.get('DATABASE_USER', 'test'),
+                'password' : os.environ.get('DATABASE_PASSWORD', 'test') }
+        
+        stderr(params)
         # connect to the PostgreSQL database
         conn = psycopg2.connect(**params)
         # create a new cursor
