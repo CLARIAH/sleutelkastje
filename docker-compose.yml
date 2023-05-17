@@ -1,0 +1,27 @@
+# version is now using "compose spec"
+# v2 and v3 are now combined!
+# docker-compose v1.27+ required
+
+services:
+  sleutelkastje:
+    environment:
+      DATABASE_HOST: "db"
+      DATABASE_USER: "test"
+      DATABASE_PASSWORD: "test"
+    build: .
+    ports:
+      - "3000:5000"
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: "test"
+      POSTGRES_PASSWORD: "test"
+      POSTGRES_DB: "sleutelkastje"
+    volumes:
+      - "db-data:/var/lib/postgresql/data"
+      - "./psql:/docker-entrypoint-initdb.d"
+
+volumes:
+  db-data:
+

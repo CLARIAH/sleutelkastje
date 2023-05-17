@@ -116,28 +116,28 @@ def add_func(app,eppn):
 def stderr(text,nl='\n'):
     sys.stderr.write(f'{text}{nl}')
 
-if __name__ == "__main__":
-
-    conn = None
-    cur = None
-    try:
-        # read database configuration
-        params = { 'host' : os.environ.get('DATABASE_HOST', 'localhost'),
+conn = None
+cur = None
+try:
+    # read database configuration
+    params = { 'host' : os.environ.get('DATABASE_HOST', 'localhost'),
                 'port' : int(os.environ.get('DATABASE_PORT', 5432)),
                 'database' : os.environ.get('DATABASE_DB', 'sleutelkastje'),
                 'user' : os.environ.get('DATABASE_USER', 'test'),
                 'password' : os.environ.get('DATABASE_PASSWORD', 'test') }
         
-        stderr(params)
-        # connect to the PostgreSQL database
-        conn = psycopg2.connect(**params)
-        # create a new cursor
-        cur = conn.cursor()
-    except Exception as e:
-        stderr(f'connection to db failed:\n{e}')
+    stderr(params)
+    # connect to the PostgreSQL database
+    conn = psycopg2.connect(**params)
+    # create a new cursor
+    cur = conn.cursor()
+except Exception as e:
+    stderr(f'connection to db failed:\n{e}')
 
 
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+if __name__ == "__main__":
 #    auth.init_app(app)
     app.run()
 
