@@ -10,6 +10,8 @@ services:
       DATABASE_USER: "test"
       DATABASE_PASSWORD: "test"
       VIRTUAL_HOST: "sleutelkast.sd.di.huc.knaw.nl"
+    networks:
+      - sleutelkast_network
     build: .
     ports:
       - "3010:5000"
@@ -27,3 +29,7 @@ services:
 volumes:
   db-data:
 
+networks:
+  sleutelkast_network:
+    external:
+      name: nginxproxynetwork
