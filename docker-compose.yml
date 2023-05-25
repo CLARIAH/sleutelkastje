@@ -9,6 +9,7 @@ services:
       DATABASE_HOST: "db"
       DATABASE_USER: "test"
       DATABASE_PASSWORD: "test"
+      VIRTUAL_HOST: "sleutelkast.sd.di.huc.knaw.nl"
     build: .
     ports:
       - "3010:5000"
