@@ -1,7 +1,7 @@
 # version is now using "compose spec"
 # v2 and v3 are now combined!
 # docker-compose v1.27+ require
-version: '2.0'
+version: '2'
 
 services:
   sleutelkastje:
@@ -10,11 +10,11 @@ services:
       DATABASE_USER: "test"
       DATABASE_PASSWORD: "test"
       VIRTUAL_HOST: "sleutelkast.sd.di.huc.knaw.nl"
-    networks:
-      - sleutelkast_network
     build: .
     ports:
       - "3010:5000"
+    networks:
+      - sleutelkast_network
 
   db:
     image: "postgres:15-alpine"
