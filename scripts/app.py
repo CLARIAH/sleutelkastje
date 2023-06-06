@@ -62,13 +62,12 @@ def add_app(app,cred,url):
 
 @app.route('/find/<app>', methods=['GET'])
 def get_app(app):
-    result = ''
-    filename = ''
+    result = cur.execute("SELECT _id FROM application WHERE mnemonic = %s",[app])
     response = make_response(render_template('get.html',result=result),200)
     #response.status = '200'
-    if request.method == 'GET':
+    #if request.method == 'GET':
         # reponse code ?
-        response = make_response(render_template('get.html',result=app),201)
+    #    response = make_response(render_template('get.html',result=app),201)
     return response
 
 @app.route('/invite/<app>/<person>', methods=['POST'])
@@ -105,12 +104,20 @@ def add_user(usr):
     response = make_response(render_template('new_user.html',usr=usr),200)
     return response
 
-@app.route('/<app>/func=<eppn>', methods=['POST'])
+@app.route('/<app>/func,eppn=<eppn>', methods=['POST'])
 @auth.login_required
-def add_func(app,eppn):
+def add_func_eppn(app,eppn):
     cur.execute('UPDATE application SET funcPerson = %s WHERE mnemonic = %s',[eppn,app])
     conn.commit()
     response = make_response(render_template('new_func.html',app=app,func=eppn),200)
+    return response
+
+@app.route('/<app>/func,eptid=<eptid>', methods=['POST'])
+@auth.login_required
+def add_func_eptid(app,eptid):
+    cur.execute('UPDATE application SET funcPerson = %s WHERE mnemonic = %s',[eptid,app])
+    conn.commit()
+    response = make_response(render_template('new_func.html',app=app,func=eptid),200)
     return response
 
 def stderr(text,nl='\n'):
