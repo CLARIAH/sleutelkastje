@@ -14,6 +14,11 @@ from flask_pyoidc.provider_configuration import ProviderConfiguration, ClientMet
 from flask_pyoidc.user_session import UserSession
 
 app = Flask(__name__)
+app.config.update({
+    'OIDC_REDIRECT_URI' : os.environ.get('APP_DOMAIN', 'http://localhost') + '/oidc_redirect',
+    'SECRET_KEY' : os.environ.get('SECRET_KEY', uuid.uuid4().hex),
+    'PERMANENT_SESSION_LIFETIME': datetime.timedelta(days=7).total_seconds(),
+                   'DEBUG': True})
 auth = HTTPBasicAuth()
 
 oidc_auth = OIDCAuthentication({'default': ProviderConfiguration(
@@ -23,11 +28,7 @@ oidc_auth = OIDCAuthentication({'default': ProviderConfiguration(
         client_secret=os.environ['OIDC_CLIENT_SECRET']),
     auth_request_params={'scope': ['openid', 'email', 'profile']},
 )}, app) if 'OIDC_SERVER' in os.environ and len(os.environ['OIDC_SERVER']) > 0 else None
-app.config.update({
-    'OIDC_REDIRECT_URI' : os.environ.get('APP_DOMAIN', 'http://localhost') + '/oidc_redirect',
-    'SECRET_KEY' : os.environ.get('SECRET_KEY', uuid.uuid4().hex),
-    'PERMANENT_SESSION_LIFETIME': datetime.timedelta(days=7).total_seconds(),
-                   'DEBUG': True})
+
 
 users = {
     "sysop": generate_password_hash("striktgeheim")
