@@ -8,6 +8,7 @@ import os
 import psycopg2
 import sys
 from werkzeug.security import generate_password_hash, check_password_hash
+import uuid
 
 from flask_pyoidc import OIDCAuthentication
 from flask_pyoidc.provider_configuration import ProviderConfiguration, ClientMetadata
