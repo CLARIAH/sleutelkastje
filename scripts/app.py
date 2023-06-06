@@ -16,7 +16,7 @@ from flask_pyoidc.user_session import UserSession
 
 app = Flask(__name__)
 app.config.update({
-    'OIDC_REDIRECT_URI' : os.environ.get('APP_DOMAIN', 'http://localhost') + '/oidc_redirect',
+    'OIDC_REDIRECT_URI' : os.environ.get('APP_DOMAIN', 'http://localhost') + '/test',
     'SECRET_KEY' : os.environ.get('SECRET_KEY', uuid.uuid4().hex),
     'PERMANENT_SESSION_LIFETIME': datetime.timedelta(days=7).total_seconds(),
                    'DEBUG': True})
@@ -91,7 +91,7 @@ def invite(app,person):
     response = make_response(render_template('invite.html',person=person,app=app),200)
     return response
 
-@app.route('/test', methods=['GET'])
+@app.route('/test_login', methods=['GET'])
 @oidc_auth.oidc_auth('default')
 def test_inlog():
     user_session = UserSession(flask.session)
