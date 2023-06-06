@@ -16,9 +16,17 @@ from flask_pyoidc.user_session import UserSession
 app = Flask(__name__)
 auth = HTTPBasicAuth()
 
-app.config.update({'OIDC_REDIRECT_URI': 'https://aboutme.diginfra.net/oauth2/redirect',
-                   'SECRET_KEY': 'dev_key',  # make sure to change this!!
-                   'PERMANENT_SESSION_LIFETIME': datetime.timedelta(days=7).total_seconds(),
+oidc_auth = OIDCAuthentication({'default': ProviderConfiguration(
+    issuer=os.environ['OIDC_SERVER'],
+    client_metadata=ClientMetadata(
+        client_id=os.environ['OIDC_CLIENT_ID'],
+        client_secret=os.environ['OIDC_CLIENT_SECRET']),
+    auth_request_params={'scope': ['openid', 'email', 'profile']},
+)}, app) if 'OIDC_SERVER' in os.environ and len(os.environ['OIDC_SERVER']) > 0 else None
+app.config.update({
+    'OIDC_REDIRECT_URI' : os.environ.get('APP_DOMAIN', 'http://localhost') + '/oidc_redirect',
+    'SECRET_KEY' : os.environ.get('SECRET_KEY', uuid.uuid4().hex),
+    'PERMANENT_SESSION_LIFETIME': datetime.timedelta(days=7).total_seconds(),
                    'DEBUG': True})
 
 users = {
@@ -71,6 +79,7 @@ def get_app(app):
     return response
 
 @app.route('/invite/<app>/<person>', methods=['POST'])
+@oidc_auth.oidc_auth('default')
 def invite(app,person):
     cur.execute("SELECT _id FROM application WHERE mnemonic = %s",[app])
     res = cur.fetchone()
@@ -79,6 +88,14 @@ def invite(app,person):
     conn.commit()
     response = make_response(render_template('invite.html',person=person,app=app),200)
     return response
+
+@app.route('/test', methods=['POST'])
+@oidc_auth.oidc_auth('default')
+def test_inlog():
+    user_session = UserSession(flask.session)
+    return jsonify(access_token=user_session.access_token,
+                   id_token=user_session.id_token,
+                   userinfo=user_session.userinfo)
 
 @app.route('/accept/<invite>', methods=['POST'])
 def accept(invite):
@@ -122,6 +139,8 @@ def add_func_eptid(app,eptid):
 
 def stderr(text,nl='\n'):
     sys.stderr.write(f'{text}{nl}')
+
+
 
 conn = None
 cur = None
