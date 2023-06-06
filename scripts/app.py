@@ -89,7 +89,7 @@ def invite(app,person):
     response = make_response(render_template('invite.html',person=person,app=app),200)
     return response
 
-@app.route('/test', methods=['POST'])
+@app.route('/test', methods=['GET'])
 @oidc_auth.oidc_auth('default')
 def test_inlog():
     user_session = UserSession(flask.session)
