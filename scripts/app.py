@@ -99,16 +99,19 @@ def test_inlog():
                    id_token=user_session.id_token,
                    userinfo=user_session.userinfo)
 
-@app.route('/accept/<invite>', methods=['POST'])
-def accept(invite):
-    if not check_credentials(usr=eppn):
-        return make_response(render_template('not_allowed.html'),404)
-    cur.execute("SELECT uuid,app FROM invitation WHERE _id = %s",[invite])
+@app.route('/register/<invite>', methods=['POST'])
+@oidc_auth.oidc_auth('default')
+def register(invite):
+#    if not check_credentials(usr=eppn):
+#        return make_response(render_template('not_allowed.html'),404)
+    result = cur.execute("SELECT uuid,app FROM invitation WHERE _id = %s",[invite])
+    # check result
     uuid,appl = cur.fetchone()
     cur.execute("SELECT mnemonic FROM application WHERE _id = %s",[appl])
     application = cur.fetchone()
     cur.execute('UPDATE users SET app = %s WHERE _id = %s',
             (appl,uuid,))
+    # remove invite
     cur.execute('DELETE FROM invitation WHERE _id = %s',[invite])
     conn.commit()
     response = make_response(render_template('accepted.html',person=uuid,app=app),200)
