@@ -109,9 +109,10 @@ def register(invite):
     uuid,appl = cur.fetchone()
     cur.execute("SELECT mnemonic FROM application WHERE _id = %s",[appl])
     application = cur.fetchone()
+    # 
     cur.execute('UPDATE users SET app = %s WHERE _id = %s',
             (appl,uuid,))
-    # remove invite
+    # remove invite:
     cur.execute('DELETE FROM invitation WHERE _id = %s',[invite])
     conn.commit()
     response = make_response(render_template('accepted.html',person=uuid,app=app),200)
