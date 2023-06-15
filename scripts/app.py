@@ -28,7 +28,7 @@ oidc_auth = OIDCAuthentication({'default': ProviderConfiguration(
         client_id=os.environ['OIDC_CLIENT_ID'],
         client_secret=os.environ['OIDC_CLIENT_SECRET']),
     auth_request_params={'scope': ['openid', 'email', 'profile'],
-        'claims':'{"userinfo":{"edupersontargetedid":null,"schac_home_organisation":null,"nickname":null,"email":null,"eppn":null,"idp":null}}'})}, app) if 'OIDC_SERVER' in os.environ and len(os.environ['OIDC_SERVER']) > 0 else None
+        'claims': {"userinfo":{"edupersontargetedid":null,"schac_home_organisation":null,"nickname":null,"email":null,"eppn":null,"idp":null}}})}, app) if 'OIDC_SERVER' in os.environ and len(os.environ['OIDC_SERVER']) > 0 else None
 
 
 users = {
