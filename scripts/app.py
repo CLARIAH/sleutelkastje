@@ -95,7 +95,9 @@ def invite(app,person):
 @oidc_auth.oidc_auth('default')
 def test_inlog():
     user_session = UserSession(flask.session)
-    stderr(user_session.userinfo)
+    
+    userinfo = json.loads(user_session.userinfo.replace("'", "\""))
+    stderr(f"eptid: {userinfo['edupersontargetedid']}")
     return jsonify(access_token=user_session.access_token,
                    id_token=user_session.id_token,
                    userinfo=user_session.userinfo)
