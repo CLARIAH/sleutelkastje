@@ -95,11 +95,10 @@ def invite(app,person):
 @oidc_auth.oidc_auth('default')
 def test_inlog():
     user_session = UserSession(flask.session)
-    result = jsonify(access_token=user_session.access_token,
+    stderr(user_session.userinfo)
+    return jsonify(access_token=user_session.access_token,
                    id_token=user_session.id_token,
                    userinfo=user_session.userinfo)
-    stderr(result.keys())
-    return result
 
 @app.route('/register/<invite>', methods=['POST'])
 @oidc_auth.oidc_auth('default')
