@@ -3,6 +3,7 @@ import datetime
 import flask
 from flask import Flask, Response, render_template, request, flash, redirect, url_for, make_response, jsonify
 from flask_httpauth import HTTPBasicAuth
+import json
 import logging
 import os
 import psycopg2
