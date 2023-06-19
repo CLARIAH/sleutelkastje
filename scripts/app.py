@@ -3,7 +3,6 @@ import datetime
 import flask
 from flask import Flask, Response, render_template, request, flash, redirect, url_for, make_response, jsonify
 from flask_httpauth import HTTPBasicAuth
-import json
 import logging
 import os
 import psycopg2
@@ -97,7 +96,7 @@ def invite(app,person):
 def test_inlog():
     user_session = UserSession(flask.session)
     
-    userinfo = json.loads(user_session.userinfo.replace("'", "\""))
+    userinfo = user_session.userinfo
     stderr(f"eptid: {userinfo['edupersontargetedid']}")
     return jsonify(access_token=user_session.access_token,
                    id_token=user_session.id_token,
