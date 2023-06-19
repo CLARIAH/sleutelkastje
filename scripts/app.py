@@ -95,7 +95,6 @@ def invite(app,person):
 @oidc_auth.oidc_auth('default')
 def test_inlog():
     user_session = UserSession(flask.session)
-    
     userinfo = user_session.userinfo
     stderr(f"eptid: {userinfo['edupersontargetedid']}")
     return jsonify(access_token=user_session.access_token,
@@ -107,9 +106,17 @@ def test_inlog():
 def register(invite):
 #    if not check_credentials(usr=eppn):
 #        return make_response(render_template('not_allowed.html'),404)
-    result = cur.execute("SELECT uuid,app FROM invitation WHERE _id = %s",[invite])
+    user_session = UserSession(flask.session)
+    userinfo = user_session.userinfo
+    userinfo['edupersontargetedid']
+
+    cur.execute("SELECT uuid,app FROM invitation WHERE _id = %s",[invite])
     # check result
     uuid,appl = cur.fetchone()
+    cur.execute("SELECT userinfo FROM users WHERE _id = %s",[uuid])
+
+    stored_userinfo = cur.fetchone()
+
     cur.execute("SELECT mnemonic FROM application WHERE _id = %s",[appl])
     application = cur.fetchone()
     # 
