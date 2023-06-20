@@ -6,6 +6,8 @@ from flask_httpauth import HTTPBasicAuth
 import logging
 import os
 import psycopg2
+import secrets
+import string
 import sys
 from werkzeug.security import generate_password_hash, check_password_hash
 import uuid
@@ -101,6 +103,13 @@ def test_inlog():
                    id_token=user_session.id_token,
                    userinfo=user_session.userinfo)
 
+@app.route('/test_api_key', methods=['GET'])
+def test_api_key():
+    api_key = 'huc:'
+    for i in range(16):
+        api_key += ''.join(secrets.choice(alphabet))
+    return jsonify(api_key=api_key)
+
 @app.route('/register/<invite>', methods=['POST'])
 @oidc_auth.oidc_auth('default')
 def register(invite):
@@ -157,6 +166,10 @@ def stderr(text,nl='\n'):
     sys.stderr.write(f'{text}{nl}')
 
 
+letters = string.ascii_letters
+digits = string.digits
+special_chars = string.punctuation
+alphabet = letters + digits + special_chars
 
 conn = None
 cur = None
