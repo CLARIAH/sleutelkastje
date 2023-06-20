@@ -103,12 +103,11 @@ def test_inlog():
                    id_token=user_session.id_token,
                    userinfo=user_session.userinfo)
 
-@app.route('/test_api_key', methods=['GET'])
-def test_api_key():
+def get_api_key():
     api_key = 'huc:'
     for i in range(16):
         api_key += ''.join(secrets.choice(alphabet))
-    return jsonify(api_key=api_key)
+    return api_key
 
 @app.route('/register/<invite>', methods=['POST'])
 @oidc_auth.oidc_auth('default')

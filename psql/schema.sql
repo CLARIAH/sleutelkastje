@@ -10,14 +10,14 @@
         CREATE TABLE invitation (
                 _id SERIAL PRIMARY KEY,
                 uuid TEXT NOT NULL,
-                app int REFERENCES application (_id)
+                app int REFERENCES application (_id),
+                usr int REFERENCES users (_id)
         );
         DROP TABLE IF EXISTS users CASCADE;
         CREATE TABLE users (
                 _id SERIAL PRIMARY KEY,
                 user_info JSON,
-                keys TEXT,
-                app int REFERENCES application (_id)
+                keys JSON
         );
         DROP TABLE IF EXISTS key CASCADE;
         CREATE TABLE key (
