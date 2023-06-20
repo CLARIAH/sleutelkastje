@@ -1,0 +1,37 @@
+@startuml
+hide circle
+' skinparam linetype ortho
+
+entity "Application" as app {
+  * mnemonic: string
+  --
+  * credentials : text
+  *redirect : text
+    'eppn:... eptid:...
+  funcPerson : text
+}
+
+entity "Invitation" as invite {
+    *i: uuidd
+}
+
+entity "Users" as user {
+     'eppn:... eptid:...
+   * ident: text, e.g "eppn:gghhhg" or "eptid:jkhhkjhkjhjkh"
+    --
+    user info: json
+    keys: json
+}
+
+entity "Key" as key {
+    *key: secret, e.g "huc:ghfjhgfghfhgjfhgf"
+    --
+    ttl: ...
+}
+
+app ||--o{ invite
+user ||--o| key
+key ||--||app
+invite ||--o| user
+
+@enduml
