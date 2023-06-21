@@ -118,20 +118,23 @@ def register(invite):
     userinfo = user_session.userinfo
     userinfo['edupersontargetedid']
 
-    cur.execute("SELECT uuid,app FROM invitation WHERE _id = %s",[invite])
+    cur.execute("SELECT _id,uuid,app,usr FROM invitation WHERE _id = %s",[invite])
     # check result
-    uuid,appl = cur.fetchone()
-    cur.execute("SELECT userinfo FROM users WHERE _id = %s",[uuid])
+    inv_id,uuid,appl,usr_id = cur.fetchone()
+    if usr_id!=None:
+        return "Invitation has been used"
 
-    stored_userinfo = cur.fetchone()
+    cur.execute("SELECT _id,userinfo FROM users WHERE _id = %s",[uuid])
+
+    user_id,stored_userinfo = cur.fetchone()
 
     cur.execute("SELECT mnemonic FROM application WHERE _id = %s",[appl])
     application = cur.fetchone()
     # 
     cur.execute('UPDATE users SET app = %s WHERE _id = %s',
             (appl,uuid,))
-    # remove invite:
-    cur.execute('DELETE FROM invitation WHERE _id = %s',[invite])
+    # connect invite to user:
+    cur.execute('UPDATE invitation SET usr = %s WHERE _id = %s',[user_id,inv_id])
     conn.commit()
     response = make_response(render_template('accepted.html',person=uuid,app=app),200)
     return response
