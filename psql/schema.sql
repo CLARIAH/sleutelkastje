@@ -22,6 +22,6 @@
         DROP TABLE IF EXISTS key CASCADE;
         CREATE TABLE key (
                 _id SERIAL NOT NULL,
-                uuid TEXT,
+                key TEXT,
                 usr int REFERENCES users (_id)
         );

@@ -49,6 +49,7 @@ def verify_password(username, password):
 #    return "Hello, {}!".format(auth.current_user())
 
 
+# 1. register app
 @app.route('/add/appl=<app>,cred=<cred>,redir=<url>', methods=['POST'])
 @auth.login_required
 def add_app(app,cred,url):
@@ -71,6 +72,7 @@ def get_app(app):
     #    response = make_response(render_template('get.html',result=app),201)
     return response
 
+# 3. user invited 
 @app.route('/invite/<app>/<person>', methods=['POST'])
 @oidc_auth.oidc_auth('default')
 def invite(app,person):
@@ -98,6 +100,7 @@ def get_api_key():
         api_key += ''.join(secrets.choice(alphabet))
     return api_key
 
+# 4. user registers
 @app.route('/register/<invite>', methods=['POST'])
 @oidc_auth.oidc_auth('default')
 def register(invite):
@@ -125,6 +128,10 @@ def register(invite):
     # connect invite to user:
     cur.execute('UPDATE invitation SET usr = %s WHERE _id = %s',[user_id,inv_id])
     conn.commit()
+    # 5. make api_key
+    api_key = get_api_key()
+    cur.execute('INSERT INTO key(key, usr) VALUES (%s, %s)', (api_key, user_id))
+    conn.commit()
     response = make_response(render_template('accepted.html',person=uuid,app=app),200)
     return response
 
@@ -139,6 +146,7 @@ def add_user(usr):
     response = make_response(render_template('new_user.html',usr=usr),200)
     return response
 
+# 2. app gets a functioneel beheerder (with eppn)
 @app.route('/<app>/func,eppn=<eppn>', methods=['POST'])
 @auth.login_required
 def add_func_eppn(app,eppn):
@@ -147,6 +155,7 @@ def add_func_eppn(app,eppn):
     response = make_response(render_template('new_func.html',app=app,func=eppn),200)
     return response
 
+# 2. app gets a functioneel beheerder (with eptid)
 @app.route('/<app>/func,eptid=<eptid>', methods=['POST'])
 @auth.login_required
 def add_func_eptid(app,eptid):
