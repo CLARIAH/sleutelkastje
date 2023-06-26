@@ -43,33 +43,22 @@ def verify_password(username, password):
             check_password_hash(users.get(username), password):
         return username
 
-@app.route("/hello")
-@auth.login_required
-def hello_world():
-    return "Hello, {}!".format(auth.current_user())
+#@app.route("/hello")
+#@auth.login_required
+#def hello_world():
+#    return "Hello, {}!".format(auth.current_user())
 
 
 @app.route('/add/appl=<app>,cred=<cred>,redir=<url>', methods=['POST'])
 @auth.login_required
 def add_app(app,cred,url):
-    '''
-    result = ''
-    appl = ''
-    cred = ''
-    url = ''
-    response = make_response(render_template('upload.html',app=app,credentials=cred,url=url),200)
-    if request.method == 'POST':
-        appl = request.form['app']
-        cred = request.form['credentials']
-        url = request.form['redirect']
-'''
-        # add app to database
+    # add app to database
     cur.execute('INSERT INTO application(mnemonic, credentials, redirect) VALUES (%s, %s, %s)',
             (app,cred,url))
     conn.commit()
     # if succesful:
+    #    return response
     return make_response(render_template('succes.html',result=app),200)
-#    return response
 
 
 @app.route('/find/<app>', methods=['GET'])
@@ -93,15 +82,15 @@ def invite(app,person):
     response = make_response(render_template('invite.html',person=person,app=app),200)
     return response
 
-@app.route('/test_login', methods=['GET'])
-@oidc_auth.oidc_auth('default')
-def test_inlog():
-    user_session = UserSession(flask.session)
-    userinfo = user_session.userinfo
-    stderr(f"eptid: {userinfo['edupersontargetedid']}")
-    return jsonify(access_token=user_session.access_token,
-                   id_token=user_session.id_token,
-                   userinfo=user_session.userinfo)
+#@app.route('/test_login', methods=['GET'])
+#@oidc_auth.oidc_auth('default')
+#def test_inlog():
+#    user_session = UserSession(flask.session)
+#    userinfo = user_session.userinfo
+#    stderr(f"eptid: {userinfo['edupersontargetedid']}")
+#    return jsonify(access_token=user_session.access_token,
+#                   id_token=user_session.id_token,
+#                   userinfo=user_session.userinfo)
 
 def get_api_key():
     api_key = 'huc:'
@@ -139,7 +128,9 @@ def register(invite):
     response = make_response(render_template('accepted.html',person=uuid,app=app),200)
     return response
 
+
 @app.route('/user/<usr>', methods=['POST'])
+@oidc_auth.oidc_auth('default')
 def add_user(usr):
     if not check_credentials(usr=eppn):
         return make_response(render_template('not_allowed.html'),404)
