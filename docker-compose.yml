@@ -20,6 +20,19 @@ services:
     networks:
       - sleutelkast_network
 
+  todo:
+    environment:
+      VIRTUAL_HOST: "todo.sd.di.huc.knaw.nl"
+      APP_DOMAIN: "https://todo.sd.di.huc.knaw.nl"
+      OIDC_SERVER: "https://testauthentication.di.huc.knaw.nl"
+      OIDC_CLIENT_ID: "nl_knaw_huc_di_sd_todo" 
+      OIDC_CLIENT_SECRET: "5RKBN2siBqLq9MUHXlKZ" 
+    build: .
+    ports:
+      - "3011:5000"
+    networks:
+      - todo_network
+
   db:
     image: "postgres:15-alpine"
     environment:
@@ -35,5 +48,8 @@ volumes:
 
 networks:
   sleutelkast_network:
+    external:
+      name: nginxproxynetwork
+  todo_network:
     external:
       name: nginxproxynetwork
