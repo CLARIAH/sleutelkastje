@@ -43,10 +43,10 @@ def verify_password(username, password):
             check_password_hash(users.get(username), password):
         return username
 
-#@app.route("/hello")
-#@auth.login_required
-#def hello_world():
-#    return "Hello, {}!".format(auth.current_user())
+@app.route("/hello")
+@auth.login_required
+def hello_world():
+    return "Hello, {}!".format(auth.current_user())
 
 
 # 1. register app
