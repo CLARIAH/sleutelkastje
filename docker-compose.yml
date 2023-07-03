@@ -27,9 +27,9 @@ services:
       OIDC_SERVER: "https://testauthentication.di.huc.knaw.nl"
       OIDC_CLIENT_ID: "nl_knaw_huc_di_sd_todo" 
       OIDC_CLIENT_SECRET: "5RKBN2siBqLq9MUHXlKZ" 
-    build: .
+    build: ./todo
     ports:
-      - "3011:5000"
+      - "3011:5001"
     networks:
       - todo_network
 

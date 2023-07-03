@@ -5,7 +5,7 @@ from flask import Flask, Response, render_template, request, flash, redirect, ur
 from flask_httpauth import HTTPBasicAuth
 import logging
 import os
-import psycopg2
+#import psycopg2
 import secrets
 import string
 import sys
