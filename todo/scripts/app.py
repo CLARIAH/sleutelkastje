@@ -41,7 +41,7 @@ def hello_world():
 
 
 @app.route('/todo', methods=['GET'])
-@oidc_auth.oidc_auth('default')
+#@oidc_auth.oidc_auth('default')
 def get_app(app):
 #    result = cur.execute("SELECT _id FROM application WHERE mnemonic = %s",[app])
 #   read inhoud abcd.todo
@@ -49,7 +49,7 @@ def get_app(app):
     return response
 
 @app.route('/test_login', methods=['GET'])
-@oidc_auth.oidc_auth('default')
+#@oidc_auth.oidc_auth('default')
 def test_inlog():
     user_session = UserSession(flask.session)
     userinfo = user_session.userinfo
