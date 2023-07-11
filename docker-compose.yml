@@ -31,7 +31,7 @@ services:
     ports:
       - "3011:5001"
     networks:
-      - todo_network
+      - sleutelkast_network
 
   db:
     image: "postgres:15-alpine"
@@ -42,14 +42,13 @@ services:
     volumes:
       - "db-data:/var/lib/postgresql/data"
       - "./psql:/docker-entrypoint-initdb.d"
+    networks:
+      - sleutelkast_network
 
 volumes:
   db-data:
 
 networks:
   sleutelkast_network:
-    external:
-      name: nginxproxynetwork
-  todo_network:
     external:
       name: nginxproxynetwork
