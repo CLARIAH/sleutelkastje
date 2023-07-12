@@ -18,7 +18,7 @@ from flask_pyoidc.user_session import UserSession
 
 app = Flask(__name__)
 app.config.update({
-    'OIDC_REDIRECT_URI' : os.environ.get('APP_DOMAIN', 'http://localhost') + '/todo',
+    'OIDC_REDIRECT_URI' : os.environ.get('APP_DOMAIN', 'http://localhost') + '/oauth2/redirect',
     'SECRET_KEY' : os.environ.get('SECRET_KEY', uuid.uuid4().hex),
     'PERMANENT_SESSION_LIFETIME': datetime.timedelta(days=7).total_seconds(),
                    'DEBUG': True})
@@ -42,14 +42,14 @@ def hello_world():
 
 @app.route('/todo', methods=['GET'])
 @oidc_auth.oidc_auth('default')
-def get_app(app):
+def get_app():
 #    result = cur.execute("SELECT _id FROM application WHERE mnemonic = %s",[app])
 #   read inhoud abcd.todo
     response = 'inhoud abcd.todo'
     return response
 
 @app.route('/test_login', methods=['GET'])
-#@oidc_auth.oidc_auth('default')
+@oidc_auth.oidc_auth('default')
 def test_inlog():
     user_session = UserSession(flask.session)
     userinfo = user_session.userinfo
