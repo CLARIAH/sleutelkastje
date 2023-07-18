@@ -43,9 +43,16 @@ def hello_world():
 @app.route('/todo', methods=['GET'])
 @oidc_auth.oidc_auth('default')
 def get_app():
-#    result = cur.execute("SELECT _id FROM application WHERE mnemonic = %s",[app])
-#   read inhoud abcd.todo
-    response = 'inhoud abcd.todo'
+    user_session = UserSession(flask.session)
+    userinfo = user_session.userinfo
+    eptid = userinfo['edupersontargetedid']
+    stderr(f"eptid: {eptid}")
+    response = ''
+    try:
+        with open(f'{todofiles}/{eptid}.todo') as todo:
+            reponse = ''.join(todo.readlines())
+    except:
+        reponse = 'No todo file, enjoy your day!'
     return response
 
 @app.route('/test_login', methods=['GET'])
@@ -64,6 +71,9 @@ def stderr(text,nl='\n'):
 
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+todofiles = 'todofiles'
+if !os.path.exists(todofiles):
+    os.mkdir(todofiles)
 
 if __name__ == "__main__":
 #    auth.init_app(app)
