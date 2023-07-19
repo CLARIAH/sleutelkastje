@@ -50,9 +50,9 @@ def get_app():
     response = ''
     try:
         with open(f'{todofiles}/{eptid}.todo') as todo:
-            reponse = ''.join(todo.readlines())
+            reponse = make_response(''.join(todo.readlines()))
     except:
-        reponse = 'No todo file, enjoy your day!'
+        reponse =  make_response('No todo file, enjoy your day!')
     return response
 
 @app.route('/test_login', methods=['GET'])
@@ -72,7 +72,7 @@ def stderr(text,nl='\n'):
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 todofiles = 'todofiles'
-if !os.path.exists(todofiles):
+if not os.path.exists(todofiles):
     os.mkdir(todofiles)
 
 if __name__ == "__main__":
