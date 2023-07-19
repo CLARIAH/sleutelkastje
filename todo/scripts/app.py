@@ -53,6 +53,7 @@ def get_app():
             reponse = make_response(''.join(todo.readlines()),200)
     except:
         reponse =  make_response('No todo file, enjoy your day!',200)
+    stderr(f'resonse: {response}')
     return response
 
 @app.route('/test_login', methods=['GET'])
