@@ -50,9 +50,9 @@ def get_app():
     response = ''
     try:
         with open(f'{todofiles}/{eptid}.todo') as todo:
-            reponse = make_response(''.join(todo.readlines()))
+            reponse = make_response(''.join(todo.readlines()),200)
     except:
-        reponse =  make_response('No todo file, enjoy your day!')
+        reponse =  make_response('No todo file, enjoy your day!',200)
     return response
 
 @app.route('/test_login', methods=['GET'])
