@@ -45,15 +45,13 @@ def hello_world():
 def get_app():
     user_session = UserSession(flask.session)
     userinfo = user_session.userinfo
-    eptid = userinfo['edupersontargetedid']
-    stderr(f"eptid: {eptid}")
+    eptid = userinfo['edupersontargetedid'][0]
     response = ''
     try:
         with open(f'{todofiles}/{eptid}.todo') as todo:
             response = make_response(''.join(todo.readlines()),200)
     except:
         response =  make_response('No todo file, enjoy your day!',200)
-    stderr(f'response: {response}')
     return response
 
 @app.route('/test_login', methods=['GET'])
