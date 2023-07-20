@@ -185,7 +185,7 @@ def post_key(appl,key):
 # credentials in the route ?
 #        return make_reponse('no credentials',401)
 #1. API key begint met huc:, zo niet return 400
-    if not key.strtswith('huc'):
+    if !key.strtswith('huc'):
         return make_reponse('unknown api key',400)
 #2. API key is bekend voor deze <app>, zo niet return 401
     cur.execute("SELECT usr FROM invitation WHERE app = %s ",[appl])
@@ -196,10 +196,11 @@ def post_key(appl,key):
         if res:
             break
     if not res:
-        make_reponse('unknown api key',401)
+        return make_reponse('unknown api key',401)
 #3. geef de user info voor de API key terug
     cur.execute("SELECT user_info FROM users WHERE _id = %s ",[usr])
-    return make_reponse(f'user info {user_info}',200)
+    user_info = cur.fetchone()[0]
+    return make_reponse(f'user info: {user_info}',200)
 
 
 
