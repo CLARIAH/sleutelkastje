@@ -55,15 +55,21 @@ def get_app():
     return response
 
 @app.route('/test_login', methods=['GET'])
-@oidc_auth.oidc_auth('default')
+#@oidc_auth.oidc_auth('default')
 def test_inlog():
-    user_session = UserSession(flask.session)
-    userinfo = user_session.userinfo
-    stderr(f"eptid: {userinfo['edupersontargetedid']}")
-    return jsonify(access_token=user_session.access_token,
-                   id_token=user_session.id_token,
-                   userinfo=user_session.userinfo)
-
+    try:
+        user_session = UserSession(flask.session)
+        userinfo = user_session.userinfo
+        stderr(f"eptid: {userinfo['edupersontargetedid']}")
+        return jsonify(access_token=user_session.access_token,
+                    id_token=user_session.id_token,
+                    userinfo=user_session.userinfo)
+    except:
+        response = 'check for the API token'
+        #TODO: check if there is a bearer token in the Authentication header
+        #TODO: if so check the token with sleutelkastje using <sleutelkast>/<appl>/<key>
+        #TODO: if valid: return the userinfo you get back from sleutelkastje else unauthorized
+        return response
 
 def stderr(text,nl='\n'):
     sys.stderr.write(f'{text}{nl}')
