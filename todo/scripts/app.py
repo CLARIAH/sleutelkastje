@@ -6,6 +6,7 @@ from flask_httpauth import HTTPBasicAuth
 import logging
 import os
 #import psycopg2
+import requests
 import secrets
 import string
 import sys
@@ -65,7 +66,13 @@ def test_inlog():
                     id_token=user_session.id_token,
                     userinfo=user_session.userinfo)
     except:
-        response = 'check for the API token'
+        # curl etc ?
+        
+        token = ''
+        headers = { 'Authetication': f'bearer ${token}' }
+        response = requests.post('https://todo.sd.di.huc.knaw.nl/todo', headers=headers)
+#        response = 'check for the API token'
+
         #TODO: check if there is a bearer token in the Authentication header
         #TODO: if so check the token with sleutelkastje using <sleutelkast>/<appl>/<key>
         #TODO: if valid: return the userinfo you get back from sleutelkastje else unauthorized
