@@ -78,7 +78,7 @@ def test_inlog():
         #TODO: check if there is a bearer token in the Authentication header
         #TODO: if so check the token with sleutelkastje using <sleutelkast>/<appl>/<key>
         #TODO: if valid: return the userinfo you get back from sleutelkastje else unauthorized
-        return jsonify(response=response)
+        return jsonify(response=response.text)
 
 def stderr(text,nl='\n'):
     sys.stderr.write(f'{text}{nl}')
