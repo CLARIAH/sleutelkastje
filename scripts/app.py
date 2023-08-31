@@ -174,34 +174,10 @@ basic authentication = de credentials voor de <app>
 3. geef de user info voor de API key terug
 '''
 
+    
 # 6b.
 # POST .../<app>/key
 #body = API key (of Satosa token, laten we nu even buiten beschouwing)
-@app.route('/<appl>/<key>', methods=['POST'])
-@oidc_auth.oidc_auth('default')
-def post_key(appl,key):
-# basic authentication = de credentials voor de <app>
-#0. credentials horen bij de <app>, zo niet return 401
-# credentials in the route ?
-#        return make_reponse('no credentials',401)
-#1. API key begint met huc:, zo niet return 400
-    if !key.strtswith('huc'):
-        return make_reponse('unknown api key',400)
-#2. API key is bekend voor deze <app>, zo niet return 401
-    cur.execute("SELECT usr FROM invitation WHERE app = %s ",[appl])
-    all_users_app = cur.fetchall()
-    for usr in all_users_app:
-        cur.execute("SELECT key FROM key WHERE usr = %s ",[usr])
-        res = cur.fetchone()
-        if res:
-            break
-    if not res:
-        return make_reponse('unknown api key',401)
-#3. geef de user info voor de API key terug
-    cur.execute("SELECT user_info FROM users WHERE _id = %s ",[usr])
-    user_info = cur.fetchone()[0]
-    return make_reponse(f'user info: {user_info}',200)
-
 @app.route('/<appl>/<key>', methods=['POST'])
 @oidc_auth.oidc_auth('default')
 def post_key(appl,key):
@@ -227,6 +203,7 @@ def post_key(appl,key):
     user_info = cur.fetchone()[0]
     return make_reponse(f'user info: {user_info}',200)
 
+
 @app.route('/<appl>', methods=['POST'])
 #@oidc_auth.oidc_auth('default')
 def post_key(appl):
@@ -236,7 +213,7 @@ def post_key(appl):
 # credentials in the route ?
 #        return make_reponse('no credentials',401)
 #1. API key begint met huc:, zo niet return 400
-    if !key.strtswith('huc'):
+    if  not key.startswith('huc'):
         return make_reponse('unknown api key',400)
 #2. API key is bekend voor deze <app>, zo niet return 401
     cur.execute("SELECT usr FROM invitation WHERE app = %s ",[appl])
