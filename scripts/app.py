@@ -68,7 +68,7 @@ def get_app(app):
     response = make_response(render_template('get.html',result=result),200)
     #response.status = '200'
     #if request.method == 'GET':
-        # reponse code ?
+        # response code ?
     #    response = make_response(render_template('get.html',result=app),201)
     return response
 
@@ -184,10 +184,10 @@ def post_key(appl,key):
 # basic authentication = de credentials voor de <app>
 #0. credentials horen bij de <app>, zo niet return 401
 # credentials in the route ?
-#        return make_reponse('no credentials',401)
+#        return make_response('no credentials',401)
 #1. API key begint met huc:, zo niet return 400
     if not key.startswith('huc'):
-        return make_reponse('unknown api key',400)
+        return make_response('unknown api key',400)
 #2. API key is bekend voor deze <app>, zo niet return 401
     cur.execute("SELECT usr FROM invitation WHERE app = %s ",[appl])
     all_users_app = cur.fetchall()
@@ -197,11 +197,11 @@ def post_key(appl,key):
         if res:
             break
     if not res:
-        return make_reponse('unknown api key',401)
+        return make_response('unknown api key',401)
 #3. geef de user info voor de API key terug
     cur.execute("SELECT user_info FROM users WHERE _id = %s ",[usr])
     user_info = cur.fetchone()[0]
-    return make_reponse(f'user info: {user_info}',200)
+    return make_response(f'user info: {user_info}',200)
 
 
 @app.route('/<appl>', methods=['POST'])
@@ -211,10 +211,10 @@ def post_appl(appl):
 # basic authentication = de credentials voor de <app>
 #0. credentials horen bij de <app>, zo niet return 401
 # credentials in the route ?
-#        return make_reponse('no credentials',401)
+#        return make_response('no credentials',401)
 #1. API key begint met huc:, zo niet return 400
     if  not key.startswith('huc'):
-        return make_reponse('unknown api key',400)
+        return make_response('unknown api key',401)
 #2. API key is bekend voor deze <app>, zo niet return 401
     cur.execute("SELECT usr FROM invitation WHERE app = %s ",[appl])
     all_users_app = cur.fetchall()
@@ -224,11 +224,11 @@ def post_appl(appl):
         if res:
             break
     if not res:
-        return make_reponse('unknown api key',401)
+        return make_response('unknown api key',401)
 #3. geef de user info voor de API key terug
     cur.execute("SELECT user_info FROM users WHERE _id = %s ",[usr])
     user_info = cur.fetchone()[0]
-    return make_reponse(f'user info: {user_info}',200)
+    return make_response(f'user info: {user_info}',200)
 
 
 
