@@ -210,7 +210,7 @@ def post_key(appl,key):
 # credentials in the route ?
 #        return make_reponse('no credentials',401)
 #1. API key begint met huc:, zo niet return 400
-    if !key.strtswith('huc'):
+    if not key.startswith('huc'):
         return make_reponse('unknown api key',400)
 #2. API key is bekend voor deze <app>, zo niet return 401
     cur.execute("SELECT usr FROM invitation WHERE app = %s ",[appl])
@@ -228,7 +228,7 @@ def post_key(appl,key):
     return make_reponse(f'user info: {user_info}',200)
 
 @app.route('/<appl>', methods=['POST'])
-@oidc_auth.oidc_auth('default')
+#@oidc_auth.oidc_auth('default')
 def post_key(appl):
     key = request.headers["Authorization"]
 # basic authentication = de credentials voor de <app>
