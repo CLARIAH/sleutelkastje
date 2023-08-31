@@ -66,6 +66,7 @@ def test_inlog():
                     id_token=user_session.id_token,
                     userinfo=user_session.userinfo)
     except:
+        print("todo app: except")
         # curl etc ?
         
         token = ''
