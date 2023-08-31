@@ -72,12 +72,13 @@ def test_inlog():
         token = ''
         headers = { 'Authorization': f'bearer ${token}' }
         response = requests.post('https://sleutelkast.sd.di.huc.knaw.nl/todo', headers=headers)
+        print(response)
 #        response = 'check for the API token'
 
         #TODO: check if there is a bearer token in the Authentication header
         #TODO: if so check the token with sleutelkastje using <sleutelkast>/<appl>/<key>
         #TODO: if valid: return the userinfo you get back from sleutelkastje else unauthorized
-        return response
+        return jsonify(response=response)
 
 def stderr(text,nl='\n'):
     sys.stderr.write(f'{text}{nl}')
