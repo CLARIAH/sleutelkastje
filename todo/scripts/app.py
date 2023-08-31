@@ -69,8 +69,8 @@ def test_inlog():
         # curl etc ?
         
         token = ''
-        headers = { 'Authetication': f'bearer ${token}' }
-        response = requests.post('https://todo.sd.di.huc.knaw.nl/todo', headers=headers)
+        headers = { 'Authorization': f'bearer ${token}' }
+        response = requests.post('https://sleutelkast.sd.di.huc.knaw.nl/todo', headers=headers)
 #        response = 'check for the API token'
 
         #TODO: check if there is a bearer token in the Authentication header
