@@ -207,7 +207,9 @@ def post_key(appl,key):
 @app.route('/<appl>', methods=['POST'])
 #@oidc_auth.oidc_auth('default')
 def post_appl(appl):
+    stderr(f'post_appl: {appl}')
     key = request.headers["Authorization"]
+    stderr(f'key: {key}')
 # basic authentication = de credentials voor de <app>
 #0. credentials horen bij de <app>, zo niet return 401
 # credentials in the route ?
