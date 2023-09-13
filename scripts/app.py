@@ -101,7 +101,7 @@ def get_api_key():
     return api_key
 
 # 4. user registers
-@app.route('/register/<invite>', methods=['POST'])
+@app.route('/register/<invite>', methods=['GET'])
 @oidc_auth.oidc_auth('default')
 def register(invite):
 #    if not check_credentials(usr=eppn):
@@ -110,7 +110,7 @@ def register(invite):
     userinfo = user_session.userinfo
     userinfo['edupersontargetedid']
 
-    cur.execute("SELECT _id,uuid,app,usr FROM invitation WHERE _id = %s",[invite])
+    cur.execute("SELECT _id,uuid,app,usr FROM invitation WHERE uuid = %s",[invite])
     # check result
     inv_id,uuid,appl,usr_id = cur.fetchone()
     if usr_id!=None:
