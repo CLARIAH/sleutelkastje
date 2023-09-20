@@ -65,6 +65,7 @@ def add_app(app,cred,url):
 
 @app.route('/find/<app>', methods=['GET'])
 def get_app(app):
+    logging.debug(f'get app[{app}]')
     result = cur.execute("SELECT _id FROM application WHERE mnemonic = %s",[app])
     response = make_response(render_template('get.html',result=result),200)
     #response.status = '200'
@@ -91,7 +92,7 @@ def invite(app,person):
 #def test_inlog():
 #    user_session = UserSession(flask.session)
 #    userinfo = user_session.userinfo
-#    stderr(f"eptid: {userinfo['edupersontargetedid']}")
+#    logging.debug(f"eptid: {userinfo['edupersontargetedid']}")
 #    return jsonify(access_token=user_session.access_token,
 #                   id_token=user_session.id_token,
 #                   userinfo=user_session.userinfo)
@@ -154,8 +155,13 @@ def add_user(usr):
 @auth.login_required
 def add_func_eppn(app,eppn):
     logging.debug(f'add functioneel beheerder eppn[{eppn}] to app[{app}]')
-    cur.execute('UPDATE application SET funcPerson = %s WHERE mnemonic = %s',[eppn,app])
-    conn.commit()
+    try:
+        cur.execute('UPDATE application SET funcPerson = %s WHERE mnemonic = %s',[eppn,app])
+        conn.commit()
+    except errors.InFailedSqlTransaction as err:
+        logging.debug(f'error in update: {err}')
+    
+    # what if app does not exists ?
     response = make_response(render_template('new_func.html',app=app,func=eppn),200)
     return response
 
@@ -212,9 +218,9 @@ def post_key(appl,key):
 @app.route('/<appl>', methods=['POST'])
 #@oidc_auth.oidc_auth('default')
 def post_appl(appl):
-    stderr(f'post_appl: {appl}')
+    logging.debug(f'post_appl: {appl}')
     key = request.headers["Authorization"]
-    stderr(f'key: {key}')
+    logging.debug(f'key: {key}')
 # basic authentication = de credentials voor de <app>
 #0. credentials horen bij de <app>, zo niet return 401
 # credentials in the route ?
@@ -258,13 +264,13 @@ try:
                 'user' : os.environ.get('DATABASE_USER', 'test'),
                 'password' : os.environ.get('DATABASE_PASSWORD', 'test') }
         
-    stderr(params)
+    logging.debug(params)
     # connect to the PostgreSQL database
     conn = psycopg2.connect(**params)
     # create a new cursor
     cur = conn.cursor()
 except Exception as e:
-    stderr(f'connection to db failed:\n{e}')
+    logging.debug(f'connection to db failed:\n{e}')
 
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
