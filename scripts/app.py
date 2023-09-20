@@ -53,6 +53,7 @@ def hello_world():
 @app.route('/add/appl=<app>,cred=<cred>,redir=<url>', methods=['POST'])
 @auth.login_required
 def add_app(app,cred,url):
+    logging.debug(f'add app[{app}] - cred[{cred}] - url[{url}]')
     # add app to database
     cur.execute('INSERT INTO application(mnemonic, credentials, redirect) VALUES (%s, %s, %s)',
             (app,cred,url))
@@ -76,6 +77,7 @@ def get_app(app):
 @app.route('/invite/<app>/<person>', methods=['GET'])
 @oidc_auth.oidc_auth('default')
 def invite(app,person):
+    logging.debug(f'invite app[{app}] for user[{person}]')
     cur.execute("SELECT _id FROM application WHERE mnemonic = %s",[app])
     res = cur.fetchone()
     cur.execute('INSERT INTO invitation(uuid, app) VALUES (%s, %s)',
@@ -104,6 +106,7 @@ def get_api_key():
 @app.route('/register/<invite>', methods=['GET'])
 @oidc_auth.oidc_auth('default')
 def register(invite):
+    logging.debug(f'register invite[{invite}]')
 #    if not check_credentials(usr=eppn):
 #        return make_response(render_template('not_allowed.html'),404)
     user_session = UserSession(flask.session)
@@ -150,6 +153,7 @@ def add_user(usr):
 @app.route('/<app>/func,eppn=<eppn>', methods=['POST'])
 @auth.login_required
 def add_func_eppn(app,eppn):
+    logging.debug(f'add functioneel beheerder eppn[{eppn}] to app[{app}]')
     cur.execute('UPDATE application SET funcPerson = %s WHERE mnemonic = %s',[eppn,app])
     conn.commit()
     response = make_response(render_template('new_func.html',app=app,func=eppn),200)
@@ -159,6 +163,7 @@ def add_func_eppn(app,eppn):
 @app.route('/<app>/func,eptid=<eptid>', methods=['POST'])
 @auth.login_required
 def add_func_eptid(app,eptid):
+    logging.debug(f'add functioneel beheerder eptid[{eptid}] to app[{app}]')
     cur.execute('UPDATE application SET funcPerson = %s WHERE mnemonic = %s',[eptid,app])
     conn.commit()
     response = make_response(render_template('new_func.html',app=app,func=eptid),200)
