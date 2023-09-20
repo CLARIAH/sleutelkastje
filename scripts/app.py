@@ -73,7 +73,7 @@ def get_app(app):
     return response
 
 # 3. user invited 
-@app.route('/invite/<app>/<person>', methods=['POST'])
+@app.route('/invite/<app>/<person>', methods=['GET'])
 @oidc_auth.oidc_auth('default')
 def invite(app,person):
     cur.execute("SELECT _id FROM application WHERE mnemonic = %s",[app])
