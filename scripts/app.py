@@ -254,6 +254,8 @@ digits = string.digits
 special_chars = string.punctuation
 alphabet = letters + digits + special_chars
 
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
 conn = None
 cur = None
 try:
@@ -265,6 +267,7 @@ try:
                 'password' : os.environ.get('DATABASE_PASSWORD', 'test') }
         
     logging.debug(params)
+    #stderr(params)
     # connect to the PostgreSQL database
     conn = psycopg2.connect(**params)
     # create a new cursor
@@ -272,8 +275,6 @@ try:
 except Exception as e:
     logging.debug(f'connection to db failed:\n{e}')
 
-
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 if __name__ == "__main__":
 #    auth.init_app(app)
