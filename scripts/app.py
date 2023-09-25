@@ -3,6 +3,7 @@ import datetime
 import flask
 from flask import Flask, Response, render_template, request, flash, redirect, url_for, make_response, jsonify
 from flask_httpauth import HTTPBasicAuth
+import json
 import logging
 import os
 import psycopg2
@@ -112,9 +113,7 @@ def register(invite):
 #        return make_response(render_template('not_allowed.html'),404)
     user_session = UserSession(flask.session)
     userinfo = user_session.userinfo
-    logging.debug(userinfo)
-    logging.debug(userinfo.__class__)
-    userinfo['edupersontargetedid']
+    userinfo_str = json.dumps(userinfo)
 
     cur.execute("SELECT _id,uuid,app,usr FROM invitation WHERE uuid = %s",[invite])
     # check result
@@ -123,8 +122,7 @@ def register(invite):
         return "Invitation has been used"
 
     #!TODO: maak een nieuwe user aan en sla de user info op als JSON -> usr_id
-    cur.execute('INSERT INTO users(user_info) VALUES (%s)', (userinfo,))
-    logging("after INSERT")
+    cur.execute('INSERT INTO users(user_info) VALUES (%s)', (userinfo_str,))
     cur.execute('SELECT LASTVAL()')
     user_id = cur.fetchone()[0]
     logging.debug(f'new user_id: {user_id}')
@@ -136,7 +134,7 @@ def register(invite):
     api_key = get_api_key()
     cur.execute('INSERT INTO key(key, usr) VALUES (%s, %s)', (api_key, user_id))
     conn.commit()
-    response = make_response(render_template('accepted.html',person=uuid,app=app),200)
+    response = make_response(render_template('accepted.html',person=uuid,app=appl,key=api_key),200)
     return response
 
 
