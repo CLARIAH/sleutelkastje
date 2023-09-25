@@ -77,14 +77,14 @@ def get_app(app):
 # 3. user invited 
 @app.route('/invite/<app>/<invite>', methods=['GET'])
 @oidc_auth.oidc_auth('default')
-def invite(app,person):
+def invite(app,invite):
     logging.debug(f'app[{app}] invite[{invite}]')
     cur.execute("SELECT _id FROM application WHERE mnemonic = %s",[app])
     res = cur.fetchone()
     cur.execute('INSERT INTO invitation(uuid, app) VALUES (%s, %s)',
-            (invite, res))
+            (invite, res['_id']))
     conn.commit()
-    response = make_response(render_template('invite.html',person=person,app=app),200)
+    response = make_response(render_template('invite.html',person=invite,app=app),200)
     return response
 
 #@app.route('/test_login', methods=['GET'])
@@ -121,9 +121,10 @@ def register(invite):
         return "Invitation has been used"
 
     #!TODO: maak een nieuwe user aan en sla de user info op als JSON -> usr_id
-    cur.execute("SELECT _id,userinfo FROM users WHERE _id = %s",[uuid])
-
-    user_id,stored_userinfo = cur.fetchone()
+    usr_info = {"":""}
+    cur.execute('INSERT INTO users(usr_info) VALUES (%s) returning _id', (usr_info))
+    user_id = cursor.fetchone()[0]
+    logging.debug(f'new user_id: {user_id}')
 
     # connect invite to user:
     cur.execute('UPDATE invitation SET usr = %s WHERE _id = %s',[user_id,inv_id])
@@ -196,28 +197,21 @@ def post_key(appl,key):
     if not key.startswith('huc'):
         return make_response('unknown api key',400)
 #2. API key is bekend voor deze <app>, zo niet return 401
-  # TODO: SELECT u._id u.user_info
-  #       FROM invite AS i
- #        JOIN app AS a
- #        ON a._id = i.app_id
-  #       JOIN usr AS u
-  #       ON i.usr_id = u._id
-  #       JOIN key ASk
-  #       ON k.usr_id =u._id
-  #       WHERE k.key = <key>
-#         AND a.mnemonic = <appl>
-    cur.execute("SELECT usr FROM invitation WHERE app = %s ",[appl])
-    all_users_app = cur.fetchall()
-    for usr in all_users_app:
-        cur.execute("SELECT key FROM key WHERE usr = %s ",[usr])
-        res = cur.fetchone()
-        if res:
-            break
+  # TODO: 
+    cur.execute('''SELECT u._id,u.user_info FROM invitation AS i
+         JOIN application AS a ON a._id = i.app
+         JOIN users AS u ON i.usr = u._id
+         JOIN key AS k ON k.usr =u._id
+            WHERE k.uuid = %s AND a.mnemonic = %s,[])
+'''
+#    cur.execute("SELECT usr FROM invitation WHERE app = %s ",[appl])
+    res = cur.fetchall()
+    logging(f'result of SELECT: {res}') 
     if not res:
         return make_response('unknown api key',401)
 #3. geef de user info voor de API key terug
-    cur.execute("SELECT user_info FROM users WHERE _id = %s ",[usr])
-    user_info = cur.fetchone()[0]
+#    cur.execute("SELECT user_info FROM users WHERE _id = %s ",[reusr])
+    user_info = res[0]['user_info']
     return make_response(f'user info: {user_info}',200)
 
 
