@@ -202,8 +202,8 @@ def post_key(appl,key):
          JOIN application AS a ON a._id = i.app
          JOIN users AS u ON i.usr = u._id
          JOIN key AS k ON k.usr =u._id
-            WHERE k.uuid = %s AND a.mnemonic = %s,[])
-'''
+            WHERE k.uuid = %s AND a.mnemonic = %s
+''',[key,appl])
 #    cur.execute("SELECT usr FROM invitation WHERE app = %s ",[appl])
     res = cur.fetchall()
     logging(f'result of SELECT: {res}') 
