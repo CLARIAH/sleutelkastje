@@ -80,9 +80,9 @@ def get_app(app):
 def invite(app,invite):
     logging.debug(f'app[{app}] invite[{invite}]')
     cur.execute("SELECT _id FROM application WHERE mnemonic = %s",[app])
-    res = cur.fetchone()
+    app_id = cur.fetchone()
     cur.execute('INSERT INTO invitation(uuid, app) VALUES (%s, %s)',
-            (invite, res['_id']))
+            (invite, app_id))
     conn.commit()
     response = make_response(render_template('invite.html',person=invite,app=app),200)
     return response
