@@ -75,14 +75,14 @@ def get_app(app):
     return response
 
 # 3. user invited 
-@app.route('/invite/<app>/<person>', methods=['GET'])
+@app.route('/invite/<app>/<invite>', methods=['GET'])
 @oidc_auth.oidc_auth('default')
 def invite(app,person):
-    logging.debug(f'invite app[{app}] for user[{person}]')
+    logging.debug(f'app[{app}] invite[{invite}]')
     cur.execute("SELECT _id FROM application WHERE mnemonic = %s",[app])
     res = cur.fetchone()
     cur.execute('INSERT INTO invitation(uuid, app) VALUES (%s, %s)',
-            (person, res))
+            (invite, res))
     conn.commit()
     response = make_response(render_template('invite.html',person=person,app=app),200)
     return response
@@ -120,15 +120,11 @@ def register(invite):
     if usr_id!=None:
         return "Invitation has been used"
 
+    #!TODO: maak een nieuwe user aan en sla de user info op als JSON -> usr_id
     cur.execute("SELECT _id,userinfo FROM users WHERE _id = %s",[uuid])
 
     user_id,stored_userinfo = cur.fetchone()
 
-    cur.execute("SELECT mnemonic FROM application WHERE _id = %s",[appl])
-    application = cur.fetchone()
-    # 
-    cur.execute('UPDATE users SET app = %s WHERE _id = %s',
-            (appl,uuid,))
     # connect invite to user:
     cur.execute('UPDATE invitation SET usr = %s WHERE _id = %s',[user_id,inv_id])
     conn.commit()
@@ -200,6 +196,16 @@ def post_key(appl,key):
     if not key.startswith('huc'):
         return make_response('unknown api key',400)
 #2. API key is bekend voor deze <app>, zo niet return 401
+  # TODO: SELECT u._id u.user_info
+  #       FROM invite AS i
+ #        JOIN app AS a
+ #        ON a._id = i.app_id
+  #       JOIN usr AS u
+  #       ON i.usr_id = u._id
+  #       JOIN key ASk
+  #       ON k.usr_id =u._id
+  #       WHERE k.key = <key>
+#         AND a.mnemonic = <appl>
     cur.execute("SELECT usr FROM invitation WHERE app = %s ",[appl])
     all_users_app = cur.fetchall()
     for usr in all_users_app:
