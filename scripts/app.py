@@ -121,7 +121,7 @@ def register(invite):
         return "Invitation has been used"
 
     #!TODO: maak een nieuwe user aan en sla de user info op als JSON -> usr_id
-    cur.execute('INSERT INTO users(usr_info) VALUES (%s) returning _id', (user_info))
+    cur.execute('INSERT INTO users(usr_info) VALUES (%s) returning _id', (userinfo))
     user_id = cursor.fetchone()[0]
     logging.debug(f'new user_id: {user_id}')
 
