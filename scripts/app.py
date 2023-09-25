@@ -112,6 +112,8 @@ def register(invite):
 #        return make_response(render_template('not_allowed.html'),404)
     user_session = UserSession(flask.session)
     userinfo = user_session.userinfo
+    logging.debug(userinfo)
+    logging.debug(userinfo.__class__)
     userinfo['edupersontargetedid']
 
     cur.execute("SELECT _id,uuid,app,usr FROM invitation WHERE uuid = %s",[invite])
@@ -121,8 +123,10 @@ def register(invite):
         return "Invitation has been used"
 
     #!TODO: maak een nieuwe user aan en sla de user info op als JSON -> usr_id
-    cur.execute('INSERT INTO users(usr_info) VALUES (%s) returning _id', (userinfo))
-    user_id = cursor.fetchone()[0]
+    cur.execute('INSERT INTO users(user_info) VALUES (%s)', (userinfo,))
+    logging("after INSERT")
+    cur.execute('SELECT LASTVAL()')
+    user_id = cur.fetchone()[0]
     logging.debug(f'new user_id: {user_id}')
 
     # connect invite to user:
