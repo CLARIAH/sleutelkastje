@@ -53,7 +53,7 @@ def get_app():
         token = 'huc:>j~|6,G$o.<lo0zf'
         headers = { 'Authorization': f'{token}' }
         response = requests.post('https://sleutelkast.sd.di.huc.knaw.nl/todo', headers=headers)
-        eptid = response.text['edupersontargetedid']
+        eptid = eval(response.text)['edupersontargetedid']
     logging.debug(f'eptid: {eptid}')
     response = ''
     try:
