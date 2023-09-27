@@ -176,13 +176,13 @@ def post_key(appl,key):
          JOIN application AS a ON a._id = i.app
          JOIN users AS u ON i.usr = u._id
          JOIN key AS k ON k.usr =u._id
-            WHERE k.uuid = %s AND a.mnemonic = %s
+            WHERE k.key = %s AND a.mnemonic = %s
 ''',[key,appl])
     res = cur.fetchall()
     if not res:
         return make_response('unknown api key',401)
 #3. geef de user info voor de API key terug
-    user_info = res[0]['user_info']
+    user_info = res[0][1]
     return make_response(f'user info: {user_info}',200)
 
 
@@ -196,18 +196,19 @@ def post_appl(appl):
     if  not key.startswith('huc'):
         return make_response('unknown api key',401)
 #2. API key is bekend voor deze <app>, zo niet return 401
-    cur.execute("SELECT usr FROM invitation WHERE app = %s ",[appl])
-    all_users_app = cur.fetchall()
-    for usr in all_users_app:
-        cur.execute("SELECT key FROM key WHERE usr = %s ",[usr])
-        res = cur.fetchone()
-        if res:
-            break
+    cur.execute('''SELECT u._id,u.user_info FROM invitation AS i
+         JOIN application AS a ON a._id = i.app
+         JOIN users AS u ON i.usr = u._id
+         JOIN key AS k ON k.usr =u._id
+            WHERE k.key = %s AND a.mnemonic = %s
+''',[key,appl])
+    res = cur.fetchall()
     if not res:
         return make_response('unknown api key',401)
 #3. geef de user info voor de API key terug
-    cur.execute("SELECT user_info FROM users WHERE _id = %s ",[usr])
-    user_info = cur.fetchone()[0]
+#    usr = res[0]['_id']
+#    cur.execute("SELECT user_info FROM users WHERE _id = %s ",[usr])
+    user_info = res[0][1]
     return make_response(f'user info: {user_info}',200)
 
 
