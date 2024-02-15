@@ -35,8 +35,10 @@ oidc_auth = OIDCAuthentication({'default': ProviderConfiguration(
 
 
 users = {
-    "sysop": generate_password_hash("striktgeheim")
+    "sysop": generate_password_hash("striktgeheim"),
+    "todo" : "ookgeheim"
 }
+#TODO: the apps, e.g., todo, should be loaded from the database
 
 @auth.verify_password
 def verify_password(username, password):
@@ -54,6 +56,7 @@ def hello_world():
 @app.route('/add/appl=<app>,cred=<cred>,redir=<url>', methods=['POST'])
 @auth.login_required
 def add_app(app,cred,url):
+    #TODO: check that logged in user is sysop
     logging.debug(f'add app[{app}] - cred[{cred}] - url[{url}]')
     # add app to database
     cur.execute('INSERT INTO application(mnemonic, credentials, redirect) VALUES (%s, %s, %s)',
@@ -79,7 +82,7 @@ def invite(app,invite):
     cur.execute('INSERT INTO invitation(uuid, app) VALUES (%s, %s)',
             (invite, app_id))
     conn.commit()
-    response = make_response(render_template('invite.html',person=invite,app=app),200)
+    response = make_response(render_template('invite.html',invite=invite,app=app),200)
     return response
 
 def get_api_key():
@@ -136,6 +139,7 @@ def add_user(usr):
 @app.route('/<app>/func,eppn=<eppn>', methods=['POST'])
 @auth.login_required
 def add_func_eppn(app,eppn):
+    #TODO: check that logged in user is sysop
     logging.debug(f'add functioneel beheerder eppn[{eppn}] to app[{app}]')
     try:
         cur.execute('UPDATE application SET funcPerson = %s WHERE mnemonic = %s',[eppn,app])
@@ -151,6 +155,7 @@ def add_func_eppn(app,eppn):
 @app.route('/<app>/func,eptid=<eptid>', methods=['POST'])
 @auth.login_required
 def add_func_eptid(app,eptid):
+    #TODO: check that logged in user is sysop
     logging.debug(f'add functioneel beheerder eptid[{eptid}] to app[{app}]')
     cur.execute('UPDATE application SET funcPerson = %s WHERE mnemonic = %s',[eptid,app])
     conn.commit()
@@ -187,8 +192,9 @@ def post_key(appl,key):
 
 
 @app.route('/<appl>', methods=['POST'])
-#@oidc_auth.oidc_auth('default')
+@auth.login_required
 def post_appl(appl):
+    #TODO: check that appl = the logged in user
     logging.debug(f'post_appl: {appl}')
     key = request.headers["Authorization"]
     logging.debug(f'key: {key}')

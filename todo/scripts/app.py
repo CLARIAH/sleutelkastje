@@ -50,9 +50,9 @@ def get_app():
         userinfo = user_session.userinfo
         eptid = userinfo['edupersontargetedid'][0]
     except:
-        token = 'huc:>j~|6,G$o.<lo0zf'
-        headers = { 'Authorization': f'{token}' }
-        response = requests.post('https://sleutelkast.sd.di.huc.knaw.nl/todo', headers=headers)
+        token = request.headers['Authorization']
+        logging.debug(f'token: {token}')
+        response = requests.post('https://sleutelkast.sd.di.huc.knaw.nl/todo', auth=('todo', 'ookgeheim'))
         eptid = eval(response.text)['edupersontargetedid'][0]
     logging.debug(f'eptid: {eptid}')
     response = ''

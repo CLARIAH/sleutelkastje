@@ -20,6 +20,8 @@ services:
     build: .
     ports:
       - "3010:5000"
+    depends_on:
+      - db
     networks:
       - sleutelkast_network
 
