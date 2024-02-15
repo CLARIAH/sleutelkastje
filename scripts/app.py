@@ -36,7 +36,7 @@ oidc_auth = OIDCAuthentication({'default': ProviderConfiguration(
 
 users = {
     "sysop": generate_password_hash("striktgeheim"),
-    "todo" : "ookgeheim"
+    "todo" : generate_password_hash("ookgeheim")
 }
 #TODO: the apps, e.g., todo, should be loaded from the database
 
@@ -196,7 +196,7 @@ def post_key(appl,key):
 def post_appl(appl):
     #TODO: check that appl = the logged in user
     logging.debug(f'post_appl: {appl}')
-    key = request.headers["Authorization"]
+    key = request.values["key"]
     logging.debug(f'key: {key}')
 #1. API key begint met huc:, zo niet return 400
     if  not key.startswith('huc'):
