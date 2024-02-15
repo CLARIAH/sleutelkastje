@@ -219,7 +219,7 @@ def post_appl(appl):
 #    usr = res[0]['_id']
 #    cur.execute("SELECT user_info FROM users WHERE _id = %s ",[usr])
     user_info = res[0][1]
-    return make_response(f'user info: {user_info}',200)
+    return jsonify(user_info)
 
 
 
