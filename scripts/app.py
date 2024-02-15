@@ -3,6 +3,7 @@ import datetime
 import flask
 from flask import Flask, Response, render_template, request, flash, redirect, url_for, make_response, jsonify
 from flask_httpauth import HTTPBasicAuth
+import json
 import logging
 import os
 import psycopg2
@@ -58,8 +59,6 @@ def add_app(app,cred,url):
     cur.execute('INSERT INTO application(mnemonic, credentials, redirect) VALUES (%s, %s, %s)',
             (app,cred,url))
     conn.commit()
-    # if succesful:
-    #    return response
     return make_response(render_template('succes.html',result=app),200)
 
 
@@ -68,34 +67,20 @@ def get_app(app):
     logging.debug(f'get app[{app}]')
     result = cur.execute("SELECT _id FROM application WHERE mnemonic = %s",[app])
     response = make_response(render_template('get.html',result=result),200)
-    #response.status = '200'
-    #if request.method == 'GET':
-        # response code ?
-    #    response = make_response(render_template('get.html',result=app),201)
     return response
 
 # 3. user invited 
 @app.route('/invite/<app>/<invite>', methods=['GET'])
 @oidc_auth.oidc_auth('default')
-def invite(app,person):
+def invite(app,invite):
     logging.debug(f'app[{app}] invite[{invite}]')
     cur.execute("SELECT _id FROM application WHERE mnemonic = %s",[app])
-    res = cur.fetchone()
+    app_id = cur.fetchone()
     cur.execute('INSERT INTO invitation(uuid, app) VALUES (%s, %s)',
-            (invite, res))
+            (invite, app_id))
     conn.commit()
-    response = make_response(render_template('invite.html',person=person,app=app),200)
+    response = make_response(render_template('invite.html',person=invite,app=app),200)
     return response
-
-#@app.route('/test_login', methods=['GET'])
-#@oidc_auth.oidc_auth('default')
-#def test_inlog():
-#    user_session = UserSession(flask.session)
-#    userinfo = user_session.userinfo
-#    logging.debug(f"eptid: {userinfo['edupersontargetedid']}")
-#    return jsonify(access_token=user_session.access_token,
-#                   id_token=user_session.id_token,
-#                   userinfo=user_session.userinfo)
 
 def get_api_key():
     api_key = 'huc:'
@@ -112,7 +97,7 @@ def register(invite):
 #        return make_response(render_template('not_allowed.html'),404)
     user_session = UserSession(flask.session)
     userinfo = user_session.userinfo
-    userinfo['edupersontargetedid']
+    userinfo_str = json.dumps(userinfo)
 
     cur.execute("SELECT _id,uuid,app,usr FROM invitation WHERE uuid = %s",[invite])
     # check result
@@ -120,10 +105,11 @@ def register(invite):
     if usr_id!=None:
         return "Invitation has been used"
 
-    #!TODO: maak een nieuwe user aan en sla de user info op als JSON -> usr_id
-    cur.execute("SELECT _id,userinfo FROM users WHERE _id = %s",[uuid])
-
-    user_id,stored_userinfo = cur.fetchone()
+    # maak een nieuwe user aan en sla de user info op als JSON -> usr_id
+    cur.execute('INSERT INTO users(user_info) VALUES (%s)', (userinfo_str,))
+    cur.execute('SELECT LASTVAL()')
+    user_id = cur.fetchone()[0]
+    logging.debug(f'new user_id: {user_id}')
 
     # connect invite to user:
     cur.execute('UPDATE invitation SET usr = %s WHERE _id = %s',[user_id,inv_id])
@@ -132,7 +118,7 @@ def register(invite):
     api_key = get_api_key()
     cur.execute('INSERT INTO key(key, usr) VALUES (%s, %s)', (api_key, user_id))
     conn.commit()
-    response = make_response(render_template('accepted.html',person=uuid,app=app),200)
+    response = make_response(render_template('accepted.html',person=uuid,app=appl,key=api_key),200)
     return response
 
 
@@ -171,16 +157,6 @@ def add_func_eptid(app,eptid):
     response = make_response(render_template('new_func.html',app=app,func=eptid),200)
     return response
 
-'''
-POST .../<app>/key
-body = API key (of Satosa token, laten we nu even buiten beschouwing)
-basic authentication = de credentials voor de <app>
-0. credentials horen bij de <app>, zo niet return 401
-1. API key begint met huc:, zo niet return 400
-2. API key is bekend voor deze <app>, zo niet return 401
-3. geef de user info voor de API key terug
-'''
-
     
 # 6b.
 # POST .../<app>/key
@@ -196,28 +172,17 @@ def post_key(appl,key):
     if not key.startswith('huc'):
         return make_response('unknown api key',400)
 #2. API key is bekend voor deze <app>, zo niet return 401
-  # TODO: SELECT u._id u.user_info
-  #       FROM invite AS i
- #        JOIN app AS a
- #        ON a._id = i.app_id
-  #       JOIN usr AS u
-  #       ON i.usr_id = u._id
-  #       JOIN key ASk
-  #       ON k.usr_id =u._id
-  #       WHERE k.key = <key>
-#         AND a.mnemonic = <appl>
-    cur.execute("SELECT usr FROM invitation WHERE app = %s ",[appl])
-    all_users_app = cur.fetchall()
-    for usr in all_users_app:
-        cur.execute("SELECT key FROM key WHERE usr = %s ",[usr])
-        res = cur.fetchone()
-        if res:
-            break
+    cur.execute('''SELECT u._id,u.user_info FROM invitation AS i
+         JOIN application AS a ON a._id = i.app
+         JOIN users AS u ON i.usr = u._id
+         JOIN key AS k ON k.usr =u._id
+            WHERE k.key = %s AND a.mnemonic = %s
+''',[key,appl])
+    res = cur.fetchall()
     if not res:
         return make_response('unknown api key',401)
 #3. geef de user info voor de API key terug
-    cur.execute("SELECT user_info FROM users WHERE _id = %s ",[usr])
-    user_info = cur.fetchone()[0]
+    user_info = res[0][1]
     return make_response(f'user info: {user_info}',200)
 
 
@@ -227,26 +192,23 @@ def post_appl(appl):
     logging.debug(f'post_appl: {appl}')
     key = request.headers["Authorization"]
     logging.debug(f'key: {key}')
-# basic authentication = de credentials voor de <app>
-#0. credentials horen bij de <app>, zo niet return 401
-# credentials in the route ?
-#        return make_response('no credentials',401)
 #1. API key begint met huc:, zo niet return 400
     if  not key.startswith('huc'):
         return make_response('unknown api key',401)
 #2. API key is bekend voor deze <app>, zo niet return 401
-    cur.execute("SELECT usr FROM invitation WHERE app = %s ",[appl])
-    all_users_app = cur.fetchall()
-    for usr in all_users_app:
-        cur.execute("SELECT key FROM key WHERE usr = %s ",[usr])
-        res = cur.fetchone()
-        if res:
-            break
+    cur.execute('''SELECT u._id,u.user_info FROM invitation AS i
+         JOIN application AS a ON a._id = i.app
+         JOIN users AS u ON i.usr = u._id
+         JOIN key AS k ON k.usr =u._id
+            WHERE k.key = %s AND a.mnemonic = %s
+''',[key,appl])
+    res = cur.fetchall()
     if not res:
         return make_response('unknown api key',401)
 #3. geef de user info voor de API key terug
-    cur.execute("SELECT user_info FROM users WHERE _id = %s ",[usr])
-    user_info = cur.fetchone()[0]
+#    usr = res[0]['_id']
+#    cur.execute("SELECT user_info FROM users WHERE _id = %s ",[usr])
+    user_info = res[0][1]
     return make_response(f'user info: {user_info}',200)
 
 
@@ -273,7 +235,6 @@ try:
                 'password' : os.environ.get('DATABASE_PASSWORD', 'test') }
         
     logging.debug(params)
-    #stderr(params)
     # connect to the PostgreSQL database
     conn = psycopg2.connect(**params)
     # create a new cursor

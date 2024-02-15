@@ -42,11 +42,19 @@ def hello_world():
 
 
 @app.route('/todo', methods=['GET'])
-@oidc_auth.oidc_auth('default')
+#@oidc_auth.oidc_auth('default')
 def get_app():
-    user_session = UserSession(flask.session)
-    userinfo = user_session.userinfo
-    eptid = userinfo['edupersontargetedid'][0]
+    eptid = ''
+    try:
+        user_session = UserSession(flask.session)
+        userinfo = user_session.userinfo
+        eptid = userinfo['edupersontargetedid'][0]
+    except:
+        token = 'huc:>j~|6,G$o.<lo0zf'
+        headers = { 'Authorization': f'{token}' }
+        response = requests.post('https://sleutelkast.sd.di.huc.knaw.nl/todo', headers=headers)
+        eptid = eval(response.text)['edupersontargetedid'][0]
+    logging.debug(f'eptid: {eptid}')
     response = ''
     try:
         with open(f'{todofiles}/{eptid}.todo') as todo:
@@ -69,8 +77,8 @@ def test_inlog():
         print("todo app: except")
         # curl etc ?
         
-        token = ''
-        headers = { 'Authorization': f'bearer ${token}' }
+        token = 'huc:>j~|6,G$o.<lo0zf'
+        headers = { 'Authorization': f'bearer {token}' }
         response = requests.post('https://sleutelkast.sd.di.huc.knaw.nl/todo', headers=headers)
         print(response)
 #        response = 'check for the API token'
