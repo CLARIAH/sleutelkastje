@@ -17,7 +17,6 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.sleutelkast.entrypoints=http"
       - "traefik.http.routers.sleutelkast.rule=Host(`sleutelkast.sd.di.huc.knaw.nl`)"
- 
     build: .
     ports:
       - "3010:5000"
@@ -42,7 +41,7 @@ services:
       - sleutelkast_network
 
   db:
-    image: "postgres:15-alpine"
+    build: ./Dockerfile.psql
     environment:
       POSTGRES_USER: "test"
       POSTGRES_PASSWORD: "test"
