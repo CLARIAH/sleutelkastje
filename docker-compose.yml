@@ -9,11 +9,15 @@ services:
       DATABASE_HOST: "db"
       DATABASE_USER: "test"
       DATABASE_PASSWORD: "test"
-      VIRTUAL_HOST: "sleutelkast.sd.di.huc.knaw.nl"
       APP_DOMAIN: "https://sleutelkast.sd.di.huc.knaw.nl"
       OIDC_SERVER: "https://testauthentication.di.huc.knaw.nl"
       OIDC_CLIENT_ID: "nl_knaw_huc_di_sd_sleutelkast" 
-      OIDC_CLIENT_SECRET: "b47e55ae-4634-11ed-a804-5329bcd6a806" 
+      OIDC_CLIENT_SECRET: "b47e55ae-4634-11ed-a804-5329bcd6a806"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sleutelkast.entrypoints=http"
+      - "traefik.http.routers.sleutelkast.rule=Host(`sleutelkast.sd.di.huc.knaw.nl`)"
+ 
     build: .
     ports:
       - "3010:5000"
@@ -27,6 +31,10 @@ services:
       OIDC_SERVER: "https://testauthentication.di.huc.knaw.nl"
       OIDC_CLIENT_ID: "nl_knaw_huc_di_sd_todo" 
       OIDC_CLIENT_SECRET: "5RKBN2siBqLq9MUHXlKZ" 
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sleutelkast-todo.entrypoints=http"
+      - "traefik.http.routers.sleutelkast-todo.rule=Host(`todo.sd.di.huc.knaw.nl`)"
     build: ./todo
     ports:
       - "3011:5001"
@@ -39,9 +47,11 @@ services:
       POSTGRES_USER: "test"
       POSTGRES_PASSWORD: "test"
       POSTGRES_DB: "sleutelkastje"
+    ports:
+      - "5454:5432"
     volumes:
       - "db-data:/var/lib/postgresql/data"
-      - "/home/meindertk/sleutelkast_dbinit:/docker-entrypoint-initdb.d"
+      - "./psql:/docker-entrypoint-initdb.d"
     networks:
       - sleutelkast_network
 
@@ -50,5 +60,6 @@ volumes:
 
 networks:
   sleutelkast_network:
+#    external: false
     external:
-      name: nginxproxynetwork
+      name: traefik-public
