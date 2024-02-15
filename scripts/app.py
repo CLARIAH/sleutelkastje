@@ -196,6 +196,7 @@ def post_key(appl,key):
 def post_appl(appl):
     #TODO: check that appl = the logged in user
     logging.debug(f'post_appl: {appl}')
+    logging.debug(f'values: {request.values}')
     key = request.values["key"]
     logging.debug(f'key: {key}')
 #1. API key begint met huc:, zo niet return 400
