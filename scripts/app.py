@@ -229,7 +229,7 @@ def stderr(text,nl='\n'):
 
 letters = string.ascii_letters
 digits = string.digits
-special_chars = string.punctuation
+special_chars = re.sub(r'["\'\\!]','',string.punctuation)
 alphabet = letters + digits + special_chars
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
