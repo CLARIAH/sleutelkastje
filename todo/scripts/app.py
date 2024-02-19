@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
+import functools
 import flask
 from flask import Flask, Response, render_template, request, flash, redirect, url_for, make_response, jsonify
 from flask_httpauth import HTTPBasicAuth
@@ -34,6 +35,15 @@ oidc_auth = OIDCAuthentication({'default': ProviderConfiguration(
         'claims': {"userinfo":{"edupersontargetedid":None,"schac_home_organisation":None,"nickname":None,"email":None,"eppn":None,"idp":None}}})}, app) if 'OIDC_SERVER' in os.environ and len(os.environ['OIDC_SERVER']) > 0 else None
 
 
+def oidc_or_header_auth(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        if oidc_auth and 'Authorization' not in request.headers:
+            return oidc_auth.oidc_auth('default')(func)(*args, **kwargs)
+        else:
+            return func(*args, **kwargs)
+    return wrapper
+
 
 @app.route("/hello")
 def hello_world():
@@ -42,14 +52,14 @@ def hello_world():
 
 
 @app.route('/todo', methods=['GET'])
-@oidc_auth.oidc_auth('default')
+@oidc_or_header_auth
 def get_app():
     eptid = ''
-    try:
-        user_session = UserSession(flask.session)
+    user_session = UserSession(flask.session, 'default')
+    if user_session.last_authenticated is None:
         userinfo = user_session.userinfo
         eptid = userinfo['edupersontargetedid'][0]
-    except:
+    else:
         token = request.headers['Authorization'].replace("Bearer","").strip()
         logging.debug(f'token: {token}')
         response = requests.post('https://sleutelkast.sd.di.huc.knaw.nl/todo', auth=('todo', 'ookgeheim'), data={"key":token})
