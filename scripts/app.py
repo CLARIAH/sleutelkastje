@@ -75,10 +75,12 @@ def get_app(app):
 # 3. user invited 
 @app.route('/invite/<app>/<invite>', methods=['GET'])
 @oidc_auth.oidc_auth('default')
-def invite(app,invite):
+def invite(app):
+    invite = get_secret(8)
     logging.debug(f'app[{app}] invite[{invite}]')
     cur.execute("SELECT _id FROM application WHERE mnemonic = %s",[app])
     app_id = cur.fetchone()
+    # hier wordt de invite code in uuid geplaatst; niet zo netjes
     cur.execute('INSERT INTO invitation(uuid, app) VALUES (%s, %s)',
             (invite, app_id))
     conn.commit()
@@ -86,10 +88,14 @@ def invite(app,invite):
     return response
 
 def get_api_key():
-    api_key = 'huc:'
-    for i in range(16):
-        api_key += ''.join(secrets.choice(alphabet))
+    api_key = 'huc:' + get_secret()
     return api_key
+
+def get_secret(length=16)
+    key = ''
+    for i in range(length):
+        key += ''.join(secrets.choice(alphabet))
+    return key
 
 # 4. user registers
 @app.route('/register/<invite>', methods=['GET'])
