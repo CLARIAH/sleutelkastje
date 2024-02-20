@@ -56,7 +56,7 @@ def hello_world():
 def get_app():
     eptid = ''
     user_session = UserSession(flask.session, 'default')
-    if user_session.last_authenticated is None:
+    if user_session.last_authenticated is not None:
         userinfo = user_session.userinfo
         eptid = userinfo['edupersontargetedid'][0]
     else:
