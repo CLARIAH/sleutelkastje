@@ -35,8 +35,8 @@ oidc_auth = OIDCAuthentication({'default': ProviderConfiguration(
 
 
 users = {
-        "sysop": { "password": generate_password_hash("striktgeheim"), "role": "sysop"}
-    "todo" : { "password": generate_password_hash("ookgeheim"), "role": "funcbeh"}
+        "sysop": { "password": generate_password_hash("striktgeheim"), "role": "sysop"},
+        "todo" : { "password": generate_password_hash("ookgeheim"), "role": "funcbeh"}
 }
 #TODO: the apps, e.g., todo, should be loaded from the database
 
