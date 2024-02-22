@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import psycopg2
+import re
 import secrets
 import string
 import sys
