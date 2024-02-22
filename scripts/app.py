@@ -44,12 +44,12 @@ users = {
 @auth.verify_password
 def verify_password(username, password):
     if username in users and \
-            check_password_hash(users.get(username), password):
+            check_password_hash(users.get(username)["password"], password):
         return username
 
 @auth.get_user_roles
 def get_user_roles(user):
-    return user['role']
+    return users[user]['role']
 
 @app.route("/hello")
 @auth.login_required
