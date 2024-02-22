@@ -35,8 +35,8 @@ oidc_auth = OIDCAuthentication({'default': ProviderConfiguration(
 
 
 users = {
-    "sysop": generate_password_hash("striktgeheim"),
-    "todo" : generate_password_hash("ookgeheim")
+        "sysop": { "password": generate_password_hash("striktgeheim"), "role": "sysop"}
+    "todo" : { "password": generate_password_hash("ookgeheim"), "role": "funcbeh"}
 }
 #TODO: the apps, e.g., todo, should be loaded from the database
 
@@ -45,6 +45,10 @@ def verify_password(username, password):
     if username in users and \
             check_password_hash(users.get(username), password):
         return username
+
+@auth.get_user_roles
+def get_user_roles(user):
+    return user['role']
 
 @app.route("/hello")
 @auth.login_required
@@ -145,9 +149,9 @@ def add_user(usr):
 
 # 2. app gets a functioneel beheerder (with eppn)
 @app.route('/<app>/func,eppn=<eppn>', methods=['POST'])
-@auth.login_required
+#TODO: check that logged in user is sysop
+@auth.login_required(role='sysop')
 def add_func_eppn(app,eppn):
-    #TODO: check that logged in user is sysop
     logging.debug(f'add functioneel beheerder eppn[{eppn}] to app[{app}]')
     try:
         cur.execute('UPDATE application SET funcPerson = %s WHERE mnemonic = %s',[eppn,app])
@@ -164,11 +168,14 @@ def add_func_eppn(app,eppn):
 @auth.login_required
 def add_func_eptid(app,eptid):
     #TODO: check that logged in user is sysop
-    logging.debug(f'add functioneel beheerder eptid[{eptid}] to app[{app}]')
-    cur.execute('UPDATE application SET funcPerson = %s WHERE mnemonic = %s',[eptid,app])
-    conn.commit()
-    response = make_response(render_template('new_func.html',app=app,func=eptid),200)
-    return response
+    if auth.current_user()['role']=='sysop':
+        logging.debug(f'add functioneel beheerder eptid[{eptid}] to app[{app}]')
+        cur.execute('UPDATE application SET funcPerson = %s WHERE mnemonic = %s',[eptid,app])
+        conn.commit()
+        response = make_response(render_template('new_func.html',app=app,func=eptid),200)
+    else:
+        response = make_response('your not a sysop!!!', 401)
+    return response()
 
     
 # 6b.
