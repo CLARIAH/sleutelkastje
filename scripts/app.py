@@ -59,7 +59,7 @@ def hello_world():
 
 # 1. register app
 @app.route('/add/appl=<app>,cred=<cred>,redir=<url>', methods=['POST'])
-@auth.login_required
+@auth.login_required(role='sysop')
 def add_app(app,cred,url):
     #TODO: check that logged in user is sysop
     logging.debug(f'add app[{app}] - cred[{cred}] - url[{url}]')
@@ -82,6 +82,9 @@ def get_app(app):
 @oidc_auth.oidc_auth('default')
 def invite(app):
     # TODO: check if it's the functioneel beheerder die deze invite maakt
+    # 1. haal de func beheerder van <app> uit de db
+    # 2. vergelijk die met degene die deze invite uitvoert
+    # 3. kijk of de role wel 'funcbeh' is
     uuid = get_invite()
     logging.debug(f'app[{app}] invite[{invite}]')
     cur.execute("SELECT _id FROM application WHERE mnemonic = %s",[app])
