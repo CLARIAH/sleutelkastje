@@ -137,10 +137,10 @@ def register(invite):
     api_key = get_api_key()
     cur.execute('INSERT INTO key(key, usr) VALUES (%s, %s)', (api_key, user_id))
     conn.commit()
-    eppn = userinfo['eppn']
+    eppn = userinfo['eppn'][0]
     cur.execute("SELECT mnemonic FROM application WHERE _id = %s",[appl_id])
     # check result
-    appl = cur.fetchone()
+    appl = cur.fetchone()[0]
     response = make_response(render_template('accepted.html',person=eppn,app=appl,key=api_key),200)
     return response
 
