@@ -120,7 +120,7 @@ def register(invite):
 
     cur.execute("SELECT _id,uuid,app,usr FROM invitation WHERE uuid = %s",[invite])
     # check result
-    inv_id,uuid,appl,usr_id = cur.fetchone()
+    inv_id,uuid,appl_id,usr_id = cur.fetchone()
     if usr_id!=None:
         return "Invitation has been used"
 
@@ -137,7 +137,11 @@ def register(invite):
     api_key = get_api_key()
     cur.execute('INSERT INTO key(key, usr) VALUES (%s, %s)', (api_key, user_id))
     conn.commit()
-    response = make_response(render_template('accepted.html',person=uuid,app=appl,key=api_key),200)
+    eppn = userinfo['eppn']
+    cur.execute("SELECT mnemonic FROM application WHERE _id = %s",[appl_id])
+    # check result
+    appl = cur.fetchone()
+    response = make_response(render_template('accepted.html',person=eppn,app=appl,key=api_key),200)
     return response
 
 
