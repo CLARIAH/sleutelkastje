@@ -172,18 +172,19 @@ def add_func_eppn(app,eppn):
     return response
 
 # 2. app gets a functioneel beheerder (with eptid)
-@app.route('/<app>/func,eptid=<eptid>', methods=['POST'])
-@auth.login_required
-def add_func_eptid(app,eptid):
+# We won't use eptid (for the forseable future
+#@app.route('/<app>/func,eptid=<eptid>', methods=['POST'])
+#@auth.login_required
+#def add_func_eptid(app,eptid):
     #TODO: check that logged in user is sysop
-    if auth.current_user()['role']=='sysop':
-        logging.debug(f'add functioneel beheerder eptid[{eptid}] to app[{app}]')
-        cur.execute('UPDATE application SET funcPerson = %s WHERE mnemonic = %s',[eptid,app])
-        conn.commit()
-        response = make_response(render_template('new_func.html',app=app,func=eptid),200)
-    else:
-        response = make_response('your not a sysop!!!', 401)
-    return response()
+    #if auth.current_user()['role']=='sysop':
+        #logging.debug(f'add functioneel beheerder eptid[{eptid}] to app[{app}]')
+        #cur.execute('UPDATE application SET funcPerson = %s WHERE mnemonic = %s',[eptid,app])
+        #conn.commit()
+        #response = make_response(render_template('new_func.html',app=app,func=eptid),200)
+    #else:
+        #response = make_response('your not a sysop!!!', 401)
+    #return response()
 
     
 # 6b.

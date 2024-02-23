@@ -54,31 +54,32 @@ def hello_world():
 @app.route('/todo', methods=['GET'])
 @oidc_or_header_auth
 def get_app():
-    eptid = ''
+    # we won't use eptid
+    #eptid = ''
     eppn = ''
     user_session = UserSession(flask.session, 'default')
     if user_session.last_authenticated is not None:
         userinfo = user_session.userinfo
-        eptid = userinfo['edupersontargetedid'][0]
+        #eptid = userinfo['edupersontargetedid'][0]
         eppn = userinfo['eppn'][0]
     else:
         token = request.headers['Authorization'].replace("Bearer","").strip()
         logging.debug(f'token: {token}')
         response = requests.post('https://sleutelkast.sd.di.huc.knaw.nl/todo', auth=('todo', 'ookgeheim'), data={"key":token})
-        eptid = response.json()['edupersontargetedid'][0]
+        #eptid = response.json()['edupersontargetedid'][0]
         eppn = response.json()['eppn'][0]
-    logging.debug(f'eptid: {eptid}')
+    #logging.debug(f'eptid: {eptid}')
     logging.debug(f'eppn: {eppn}')
     response = ''
+    #try:
+        #with open(f'{todofiles}/{eptid}.todo') as todo:
+            #response = make_response(''.join(todo.readlines()),200)
+    #except:
     try:
-        with open(f'{todofiles}/{eptid}.todo') as todo:
+        with open(f'{todofiles}/{eppn}.todo') as todo:
             response = make_response(''.join(todo.readlines()),200)
     except:
-        try:
-            with open(f'{todofiles}/{eppn}.todo') as todo:
-                response = make_response(''.join(todo.readlines()),200)
-        except:
-            response =  make_response('No todo file, enjoy your day!',200)
+        response =  make_response('No todo file, enjoy your day!',200)
     return response
 
 @app.route('/test_login', methods=['GET'])
@@ -87,7 +88,8 @@ def test_inlog():
     try:
         user_session = UserSession(flask.session)
         userinfo = user_session.userinfo
-        stderr(f"eptid: {userinfo['edupersontargetedid']}")
+        #stderr(f"eptid: {userinfo['edupersontargetedid']}")
+        stderr(f"eppn: {userinfo['eppn']}")
         return jsonify(access_token=user_session.access_token,
                     id_token=user_session.id_token,
                     userinfo=user_session.userinfo)
