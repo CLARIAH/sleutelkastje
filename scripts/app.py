@@ -69,6 +69,7 @@ def add_app(app,cred,url):
             (app,generate_password_hash(cred),url))
     conn.commit()
     #TODO 20240304: add <app>, generate_password_hash(<cred>) also to users dictionary
+    users[app] = { "password": generate_password_hash(cred), "role": "funcbeh"}} 
     return make_response(render_template('succes.html',result=app),200)
 
 
@@ -80,8 +81,11 @@ def get_app(app):
     return response
 
 def is_func(app,eppn):
-    pass
     #TODO 20240304: check if the <eppn> is from the funcbeh of <app>, return true if so otherwise false
+    cur.execute("SELECT funcPerson FROM application WHERE mnemonic = %s",[app])
+    func_person = cur.fetchone()[0]
+    logging.debug(f'fp: {func_person} ({eppn==func_person})')
+    return eppn == func_person
 
 # 3. user invited 
 @app.route('/invite/<app>', methods=['GET'])
@@ -91,11 +95,16 @@ def invite(app):
     # 1. haal de func beheerder van <app> uit de db
     # 2. vergelijk die met degene die deze invite uitvoert
     # 3. kijk of de role wel 'funcbeh' is
+    user_session = UserSession(flask.session)
+    userinfo = user_session.userinfo
     if not is_func(app,userinfo['eppn'][0]):
         # TODO 20240304: return unauthorized
+        logging.debug('false')
         return make_response('',401)
+    else:
+        logging.debug('true')
     uuid = get_invite()
-    logging.debug(f'app[{app}] invite[{invite}]')
+    logging.debug(f'app[{app}] invite[{uuid}]')
     cur.execute("SELECT _id FROM application WHERE mnemonic = %s",[app])
     app_id = cur.fetchone()
     cur.execute('INSERT INTO invitation(uuid, app) VALUES (%s, %s)',
