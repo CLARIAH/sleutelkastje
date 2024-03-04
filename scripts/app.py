@@ -39,9 +39,8 @@ users = {
         "sysop": { "password": generate_password_hash("striktgeheim"), "role": "sysop"}
 }
 
-result = cur.execute("SELECT * FROM application")
-logging.debug(f'all appl-s: {result}')
 #TODO 20240304: the apps, e.g., todo, should be loaded from the database and their <app>,<cred> added to the users dictionary
+# this is done below after connecting to the database
 
 @auth.verify_password
 def verify_password(username, password):
@@ -286,6 +285,10 @@ try:
     conn = psycopg2.connect(**params)
     # create a new cursor
     cur = conn.cursor()
+    #TODO 20240304: the apps, e.g., todo, should be loaded from the database and their <app>,<cred> added to the users dictionary
+    result = cur.execute("SELECT * FROM application")
+    logging.debug(f'all appl-s: {result}')
+    # add to users
 except Exception as e:
     logging.debug(f'connection to db failed:\n{e}')
 
