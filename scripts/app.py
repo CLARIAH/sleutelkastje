@@ -39,7 +39,7 @@ users = {
         "sysop": { "password": generate_password_hash("striktgeheim"), "role": "sysop"}
 }
 
-result = cur.execute("SELECT _id FROM application WHERE mnemonic = %s",[app])
+result = cur.execute("SELECT * FROM application")
 logging.debug(f'all appl-s: {result}')
 #TODO 20240304: the apps, e.g., todo, should be loaded from the database and their <app>,<cred> added to the users dictionary
 
@@ -81,6 +81,7 @@ def get_app(app):
     return response
 
 def is_func(app,eppn):
+    pass
     #TODO 20240304: check if the <eppn> is from the funcbeh of <app>, return true if so otherwise false
 
 # 3. user invited 
