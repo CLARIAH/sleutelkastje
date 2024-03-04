@@ -63,11 +63,12 @@ def get_app():
         #eptid = userinfo['edupersontargetedid'][0]
         #TODO: al ingelogd betekent niet dat deze gebruiker ook deze app mag gebruiken...
         response = requests.post('https://sleutelkast.sd.di.huc.knaw.nl/todo')
-        if isinstance(response,Response):
-            logging.debug(f'data: {response.data}')
-            logging.debug(f'status: {response.status}')
-            logging.debug(f'status_code: {response.status_code}')
-            return response
+        if 'error' in response.json():
+            error = response.json()['error']
+            status = response.json()['status']
+            logging.debug(f"error: {error}")
+            logging.debug(f"status: {status}")
+            return make_response(error,status)
         else:
             eppn = response.json()['eppn'][0]
         #eppn = userinfo['eppn'][0]
