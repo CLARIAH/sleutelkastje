@@ -62,16 +62,7 @@ def get_app():
         userinfo = user_session.userinfo
         #eptid = userinfo['edupersontargetedid'][0]
         #TODO: al ingelogd betekent niet dat deze gebruiker ook deze app mag gebruiken...
-        response = requests.post('https://sleutelkast.sd.di.huc.knaw.nl/todo')
-        if 'error' in response.json():
-            error = response.json()['error']
-            status = response.json()['status']
-            logging.debug(f"error: {error}")
-            logging.debug(f"status: {status}")
-            return make_response(error,status)
-        else:
-            eppn = response.json()['eppn'][0]
-        #eppn = userinfo['eppn'][0]
+        eppn = userinfo['eppn'][0]
     else:
         token = request.headers['Authorization'].replace("Bearer","").strip()
         logging.debug(f'token: {token}')
