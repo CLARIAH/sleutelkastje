@@ -36,10 +36,9 @@ oidc_auth = OIDCAuthentication({'default': ProviderConfiguration(
 
 
 users = {
-        "sysop": { "password": generate_password_hash("striktgeheim"), "role": "sysop"},
-        "todo" : { "password": generate_password_hash("ookgeheim"), "role": "funcbeh"}
+        "sysop": { "password": generate_password_hash("striktgeheim"), "role": "sysop"}
 }
-#TODO: the apps, e.g., todo, should be loaded from the database
+#TODO 20240304: the apps, e.g., todo, should be loaded from the database and their <app>,<cred> added to the users dictionary
 
 @auth.verify_password
 def verify_password(username, password):
@@ -65,8 +64,9 @@ def add_app(app,cred,url):
     logging.debug(f'add app[{app}] - cred[{cred}] - url[{url}]')
     # add app to database
     cur.execute('INSERT INTO application(mnemonic, credentials, redirect) VALUES (%s, %s, %s)',
-            (app,cred,url))
+            (app,generate_password_hash(cred),url))
     conn.commit()
+    #TODO 20240304: add <app>, generate_password_hash(<cred>) also to users dictionary
     return make_response(render_template('succes.html',result=app),200)
 
 
@@ -77,6 +77,9 @@ def get_app(app):
     response = make_response(render_template('get.html',result=result),200)
     return response
 
+def is_func(app,eppn):
+    #TODO 20240304: check if the <eppn> is from the funcbeh of <app>, return true if so otherwise false
+
 # 3. user invited 
 @app.route('/invite/<app>', methods=['GET'])
 @oidc_auth.oidc_auth('default')
@@ -85,6 +88,8 @@ def invite(app):
     # 1. haal de func beheerder van <app> uit de db
     # 2. vergelijk die met degene die deze invite uitvoert
     # 3. kijk of de role wel 'funcbeh' is
+    if not is_func(app,userinfo['eppn'][0]):
+        # TODO 20240304: return unauthorized
     uuid = get_invite()
     logging.debug(f'app[{app}] invite[{invite}]')
     cur.execute("SELECT _id FROM application WHERE mnemonic = %s",[app])
@@ -218,7 +223,9 @@ def post_key(appl,key):
 @app.route('/<appl>', methods=['POST'])
 @auth.login_required
 def post_appl(appl):
-    #TODO: check that appl = the logged in user
+    #TODO 20240304: check that <appl> = the logged in user
+    if auth.current_user() != appl and auth.current_role()!= 'sysop':
+        #TODO 20240304: return unauthorized
     logging.debug(f'post_appl: {appl}')
     logging.debug(f'values: {request.values}')
     logging.debug(f'form: {request.form}')
