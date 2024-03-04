@@ -83,7 +83,10 @@ def get_app(app):
 def is_func(app,eppn):
     #TODO 20240304: check if the <eppn> is from the funcbeh of <app>, return true if so otherwise false
     cur.execute("SELECT funcPerson FROM application WHERE mnemonic = %s",[app])
-    func_person = cur.fetchone()[0]
+    func_person = cur.fetchone()
+    if func_person is None:
+        return False
+    func_person = func_person[0]
     logging.debug(f'fp: {func_person} ({eppn==func_person})')
     return eppn == func_person
 
@@ -292,6 +295,7 @@ try:
     # create a new cursor
     cur = conn.cursor()
     #TODO 20240304: the apps, e.g., todo, should be loaded from the database and their <app>,<cred> added to the users dictionary
+    # up till now: always None ???
     result = cur.execute("SELECT * FROM application")
     logging.debug(f'all appl-s: {result}')
     # add to users
