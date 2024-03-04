@@ -61,7 +61,10 @@ def get_app():
     if user_session.last_authenticated is not None:
         userinfo = user_session.userinfo
         #eptid = userinfo['edupersontargetedid'][0]
-        eppn = userinfo['eppn'][0]
+        #TODO: al ingelogd betekent niet dat deze gebruiker ook deze app mag gebruiken...
+        response = requests.post('https://sleutelkast.sd.di.huc.knaw.nl/todo')
+        eppn = response.json()['eppn'][0]
+        #eppn = userinfo['eppn'][0]
     else:
         token = request.headers['Authorization'].replace("Bearer","").strip()
         logging.debug(f'token: {token}')

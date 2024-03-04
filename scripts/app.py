@@ -238,6 +238,7 @@ def post_key(appl,key):
 def post_appl(appl):
     #TODO 20240304: check that <appl> = the logged in user
     if auth.current_user() != appl and auth.current_role()!= 'sysop':
+        return make_response('unauthorized',401)
         pass
         #TODO 20240304: return unauthorized
     logging.debug(f'post_appl: {appl}')
