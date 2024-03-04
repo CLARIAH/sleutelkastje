@@ -38,6 +38,9 @@ oidc_auth = OIDCAuthentication({'default': ProviderConfiguration(
 users = {
         "sysop": { "password": generate_password_hash("striktgeheim"), "role": "sysop"}
 }
+
+result = cur.execute("SELECT _id FROM application WHERE mnemonic = %s",[app])
+logging.debug(f'all appl-s: {result}')
 #TODO 20240304: the apps, e.g., todo, should be loaded from the database and their <app>,<cred> added to the users dictionary
 
 @auth.verify_password
@@ -90,6 +93,7 @@ def invite(app):
     # 3. kijk of de role wel 'funcbeh' is
     if not is_func(app,userinfo['eppn'][0]):
         # TODO 20240304: return unauthorized
+        return make_response('',401)
     uuid = get_invite()
     logging.debug(f'app[{app}] invite[{invite}]')
     cur.execute("SELECT _id FROM application WHERE mnemonic = %s",[app])
