@@ -69,7 +69,7 @@ def add_app(app,cred,url):
             (app,generate_password_hash(cred),url))
     conn.commit()
     #TODO 20240304: add <app>, generate_password_hash(<cred>) also to users dictionary
-    users[app] = { "password": generate_password_hash(cred), "role": "funcbeh"}} 
+    users[app] = { "password": generate_password_hash(cred), "role": "funcbeh"}
     return make_response(render_template('succes.html',result=app),200)
 
 
@@ -99,10 +99,7 @@ def invite(app):
     userinfo = user_session.userinfo
     if not is_func(app,userinfo['eppn'][0]):
         # TODO 20240304: return unauthorized
-        logging.debug('false')
-        return make_response('',401)
-    else:
-        logging.debug('true')
+        return make_response('unauthorized',401)
     uuid = get_invite()
     logging.debug(f'app[{app}] invite[{uuid}]')
     cur.execute("SELECT _id FROM application WHERE mnemonic = %s",[app])
