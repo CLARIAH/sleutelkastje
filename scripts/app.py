@@ -63,12 +63,14 @@ def hello_world():
 @auth.login_required(role='sysop')
 def add_app(app,cred,url):
     #TODO: check that logged in user is sysop
+    #DONE (check this)
     logging.debug(f'add app[{app}] - cred[{cred}] - url[{url}]')
     # add app to database
     cur.execute('INSERT INTO application(mnemonic, credentials, redirect) VALUES (%s, %s, %s)',
             (app,generate_password_hash(cred),url))
     conn.commit()
     #TODO 20240304: add <app>, generate_password_hash(<cred>) also to users dictionary
+    #DONE (check this)
     users[app] = { "password": generate_password_hash(cred), "role": "funcbeh"}
     return make_response(render_template('succes.html',result=app),200)
 
@@ -176,6 +178,7 @@ def add_user(usr):
 # 2. app gets a functioneel beheerder (with eppn)
 @app.route('/<app>/func,eppn=<eppn>', methods=['POST'])
 #TODO: check that logged in user is sysop
+#DONE (check this)
 @auth.login_required(role='sysop')
 def add_func_eppn(app,eppn):
     logging.debug(f'add functioneel beheerder eppn[{eppn}] to app[{app}]')
@@ -237,11 +240,11 @@ def post_key(appl,key):
 @auth.login_required
 def post_appl(appl):
     #TODO 20240304: check that <appl> = the logged in user
+        logging.debug(f'error: unauthorized - status: 401')
     if auth.current_user() != appl and auth.current_role()!= 'sysop':
-        return jsonify({'error': 'unauthorized', 'status': 401})
-#        return Response(error, status=401, mimetype='application/json')
-#        return make_response(('unauthorized',401,{}))
         #TODO 20240304: return unauthorized
+        logging.debug(f'error: unauthorized - status: 401')
+        return jsonify({'error': 'unauthorized', 'status': 401})
     logging.debug(f'post_appl: {appl}')
     logging.debug(f'values: {request.values}')
     logging.debug(f'form: {request.form}')
@@ -263,8 +266,6 @@ def post_appl(appl):
     if not res:
         return make_response('unknown api key',401)
 #3. geef de user info voor de API key terug
-#    usr = res[0]['_id']
-#    cur.execute("SELECT user_info FROM users WHERE _id = %s ",[usr])
     user_info = res[0][1]
     return jsonify(user_info)
 
