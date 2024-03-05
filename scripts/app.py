@@ -63,14 +63,14 @@ def hello_world():
 @auth.login_required(role='sysop')
 def add_app(app,cred,url):
     #TODO: check that logged in user is sysop
-    #DONE (check this)
+    #DONE
     logging.debug(f'add app[{app}] - cred[{cred}] - url[{url}]')
     # add app to database
     cur.execute('INSERT INTO application(mnemonic, credentials, redirect) VALUES (%s, %s, %s)',
             (app,generate_password_hash(cred),url))
     conn.commit()
     #TODO 20240304: add <app>, generate_password_hash(<cred>) also to users dictionary
-    #DONE (check this)
+    #DONE
     users[app] = { "password": generate_password_hash(cred), "role": "funcbeh"}
     return make_response(render_template('succes.html',result=app),200)
 
@@ -84,6 +84,7 @@ def get_app(app):
 
 def is_func(app,eppn):
     #TODO 20240304: check if the <eppn> is from the funcbeh of <app>, return true if so otherwise false
+    #DONE
     cur.execute("SELECT funcPerson FROM application WHERE mnemonic = %s",[app])
     func_person = cur.fetchone()
     if func_person is None:
@@ -96,14 +97,16 @@ def is_func(app,eppn):
 @app.route('/invite/<app>', methods=['GET'])
 @oidc_auth.oidc_auth('default')
 def invite(app):
-    # TODO: check if it's the functioneel beheerder die deze invite maakt
+    #TODO: check if it's the functioneel beheerder die deze invite maakt
+    #DONE
     # 1. haal de func beheerder van <app> uit de db
     # 2. vergelijk die met degene die deze invite uitvoert
     # 3. kijk of de role wel 'funcbeh' is
     user_session = UserSession(flask.session)
     userinfo = user_session.userinfo
     if not is_func(app,userinfo['eppn'][0]):
-        # TODO 20240304: return unauthorized
+        #TODO 20240304: return unauthorized
+        #DONE
         return make_response('unauthorized',401)
     uuid = get_invite()
     logging.debug(f'app[{app}] invite[{uuid}]')
@@ -178,7 +181,7 @@ def add_user(usr):
 # 2. app gets a functioneel beheerder (with eppn)
 @app.route('/<app>/func,eppn=<eppn>', methods=['POST'])
 #TODO: check that logged in user is sysop
-#DONE (check this)
+#DONE
 @auth.login_required(role='sysop')
 def add_func_eppn(app,eppn):
     logging.debug(f'add functioneel beheerder eppn[{eppn}] to app[{app}]')
