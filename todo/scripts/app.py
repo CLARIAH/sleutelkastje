@@ -68,7 +68,10 @@ def get_app():
         logging.debug(f'token: {token}')
         response = requests.post('https://sleutelkast.sd.di.huc.knaw.nl/todo', auth=('todo', 'ookgeheim'), data={"key":token})
         #eptid = response.json()['edupersontargetedid'][0]
-        eppn = response.json()['eppn'][0]
+        try:
+            eppn = response.json()['eppn'][0]
+        except:
+            return make_response('Unauthorized',401)
     #logging.debug(f'eptid: {eptid}')
     logging.debug(f'eppn: {eppn}')
     response = ''
