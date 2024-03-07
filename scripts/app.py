@@ -243,7 +243,6 @@ def post_key(appl,key):
 @auth.login_required
 def post_appl(appl):
     #TODO 20240304: check that <appl> = the logged in user
-        logging.debug(f'error: unauthorized - status: 401')
     if auth.current_user() != appl and auth.current_role()!= 'sysop':
         #TODO 20240304: return unauthorized
         logging.debug(f'error: unauthorized - status: 401')
