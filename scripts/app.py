@@ -301,9 +301,17 @@ try:
     cur = conn.cursor()
     #TODO 20240304: the apps, e.g., todo, should be loaded from the database and their <app>,<cred> added to the users dictionary
     # up till now: always None ???
-    result = cur.execute("SELECT * FROM application")
+    cur.execute("SELECT * FROM application")
+    result = cur.fetchall()
     logging.debug(f'all appl-s: {result}')
+    for res in result:
+        logging.debug(f'appl: {res[1]}')
+        logging.debug(f'pass: {res[2]}')
+        logging.debug(f'func: {res[4]}')
     # add to users
+        if not res[4] is None:
+            users[res[1]] = { "password":res[2], "role":"funcbeh" }
+            logging.debug(users[res[1]])
 except Exception as e:
     logging.debug(f'connection to db failed:\n{e}')
 
