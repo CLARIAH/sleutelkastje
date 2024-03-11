@@ -55,7 +55,7 @@ services:
       - "traefik.http.routers.sleutelkast-todo-j.rule=Host(`todo-j.sd.di.huc.knaw.nl`)"
     build: ./todo/java
     ports:
-      - "3011:5002"
+      - "3012:5001"
     networks:
       - sleutelkast_network
 
