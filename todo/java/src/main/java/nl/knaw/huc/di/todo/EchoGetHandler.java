@@ -1,35 +1,40 @@
 package nl.knaw.huc.di.todo;
 
-import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpServer;
-
-import org.apache.commons.text.StringEscapeUtils;
+import com.sun.net.httpserver.HttpExchange;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.InetSocketAddress;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Todo {
+import static nl.knaw.huc.di.todo.Todo.parseQuery;
 
-    public static void main(String[] args) throws IOException {
-        System.out.println("Hello world!");
-        int port = 9000;
-        HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
-        System.out.println("server started at " + port);
-        server.createContext("/", new RootHandler());
-        server.createContext("/echoHeader", new EchoHeaderHandler());
-        server.createContext("/echoGet", new EchoGetHandler());
-        server.createContext("/echoPost", new EchoPostHandler());
-        server.setExecutor(null);
-        server.start();
+public class EchoGetHandler implements HttpHandler {
+
+    @Override
+
+    public void handle(HttpExchange he) throws IOException {
+        // parse request
+        Map<String, Object> parameters = new HashMap<String, Object>();
+        URI requestedUri = he.getRequestURI();
+        String query = requestedUri.getRawQuery();
+        parseQuery(query, parameters);
+
+        // send response
+        String response = "";
+        for (String key : parameters.keySet())
+            response += key + " = " + parameters.get(key) + "\n";
+        he.sendResponseHeaders(200, response.length());
+        OutputStream os = he.getResponseBody();
+        os.write(response.toString().getBytes());
+        os.close();
     }
-
 
     public static void parseQuery(String query, Map<String,
         Object> parameters) throws UnsupportedEncodingException {
@@ -68,7 +73,4 @@ public class Todo {
             }
         }
     }
-
- }
-
-
+}
