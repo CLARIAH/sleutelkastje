@@ -300,15 +300,11 @@ try:
     # create a new cursor
     cur = conn.cursor()
     #TODO 20240304: the apps, e.g., todo, should be loaded from the database and their <app>,<cred> added to the users dictionary
-    # up till now: always None ???
+    #DONE
     cur.execute("SELECT * FROM application")
     result = cur.fetchall()
-    logging.debug(f'all appl-s: {result}')
-    for res in result:
-        logging.debug(f'appl: {res[1]}')
-        logging.debug(f'pass: {res[2]}')
-        logging.debug(f'func: {res[4]}')
     # add to users
+    for res in result:
         if not res[4] is None:
             users[res[1]] = { "password":res[2], "role":"funcbeh" }
             logging.debug(users[res[1]])
