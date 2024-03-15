@@ -13,12 +13,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static nl.knaw.huc.di.todo.Todo.parseQuery;
+import javax.ws.rs.Path;
 
 public class EchoGetHandler implements HttpHandler {
 
     @Override
-
+    @Path("/todo")
     public void handle(HttpExchange he) throws IOException {
         // parse request
         Map<String, Object> parameters = new HashMap<String, Object>();
