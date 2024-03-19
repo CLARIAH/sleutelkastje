@@ -2,6 +2,11 @@ package nl.knaw.huc.di.todo;
 
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
+import com.sun.org.slf4j.internal.Logger;
+import com.sun.org.slf4j.internal.LoggerFactory;
+import nl.knaw.huc.di.openidconnect.LoginEndPoint;
+import nl.knaw.huc.di.openidconnect.OpenIdClient;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -12,10 +17,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
 
 public class EchoGetHandler implements HttpHandler {
+
+    public static final Logger LOG = LoggerFactory.getLogger(LoginEndPoint.class);
+    private final Map<UUID, LoginSessionData> loginSessions;
+    private final OpenIdClient openIdClient;
+
 
     @Override
     @Path("/todo")
@@ -36,6 +50,18 @@ public class EchoGetHandler implements HttpHandler {
         os.close();
     }
 
+    @Path("/login")
+    public Response handle(@QueryParam("redirect-uri") String clientRedirectUri) {
+        if (StringUtils.isBlank(clientRedirectUri)) {
+            return Response.status(400).entity("expected a query param redirect-uri").build();
+        }
+
+        UUID sessionId = UUID.randomUUID();
+        UUID nonce = UUID.randomUUID();
+
+        loginSessions.put(sessionId, new LoginSessionData(clientRedirectUri, nonce.toString()));
+        return openIdClient.createRedirectResponse(sessionId, nonce);
+    }
     public static void parseQuery(String query, Map<String,
         Object> parameters) throws UnsupportedEncodingException {
 
