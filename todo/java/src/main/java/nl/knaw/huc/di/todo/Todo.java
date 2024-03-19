@@ -15,9 +15,9 @@ public class Todo {
   private final OpenIdClient openIdClient;
 
   public static void main(String[] args) {
-
+    System.out.println("Hello world!");
   }
-  
+
   public Todo(OpenIdClient openIdClient) {
     this.openIdClient = openIdClient;
     loginSessions = new ConcurrentHashMap<>();
