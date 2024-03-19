@@ -5,7 +5,6 @@ import org.apache.commons.lang3.StringUtils;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Response;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,9 +21,9 @@ public class Todo {
 
   @GET
   @Path("/login")
-  public Response login(@QueryParam("redirect-uri") String clientRedirectUri) {
+  public String login(@QueryParam("redirect-uri") String clientRedirectUri) {
     if (StringUtils.isBlank(clientRedirectUri)) {
-      return Response.status(400).entity("expected a query param redirect-uri").build();
+      return "status(400) - expected a query param redirect-uri";
     }
 
     UUID sessionId = UUID.randomUUID();
@@ -34,14 +33,14 @@ public class Todo {
     return openIdClient.createRedirectResponse(sessionId, nonce);
   }
 
-  @GET
-  @Path("/callback")
-  public Response callback(@QueryParam("state") UUID loginSession, @QueryParam("code") String code) {
-    if (!loginSessions.containsKey(loginSession)) {
-      return Response.status(417).entity("Login session unknown").build();
-    }
-    return null;
-  }
+  // @GET
+  // @Path("/callback")
+  // public Response callback(@QueryParam("state") UUID loginSession, @QueryParam("code") String code) {
+  //   if (!loginSessions.containsKey(loginSession)) {
+  //     return Response.status(417).entity("Login session unknown").build();
+  //   }
+  //   return null;
+  // }
     private record LoginSessionData(String userRedirectUri, String nonce) {
     }
 

@@ -27,7 +27,6 @@ import com.nimbusds.openid.connect.sdk.validators.IDTokenValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -90,7 +89,7 @@ public class OpenIdClient {
     }
   }
 
-  public Response createRedirectResponse(UUID sessionId, UUID nonce) {
+  public String createRedirectResponse(UUID sessionId, UUID nonce) {
     final URI openIdServer = fromUri(metadata.getAuthorizationEndpointURI())
         .queryParam("response_type", "code")
         .queryParam("client_id", clientId)
@@ -101,7 +100,8 @@ public class OpenIdClient {
         .queryParam("nonce", nonce)
         .build();
 
-    return Response.temporaryRedirect(openIdServer).build();
+    // return Response.temporaryRedirect(openIdServer).build();
+    return openIdServer.toString();
   }
 
   public Tokens getUserTokens(String code, String nonce) throws OpenIdConnectException {
