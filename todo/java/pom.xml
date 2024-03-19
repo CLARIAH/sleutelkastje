@@ -11,7 +11,7 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-text</artifactId>
-      <version>1.9</version>
+      <version>1.11.0</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -21,7 +21,7 @@
     <dependency>
       <groupId>xalan</groupId>
       <artifactId>xalan</artifactId>
-      <version>2.7.2</version>
+      <version>2.7.3</version>
     </dependency>
     <dependency>
       <groupId>jakarta.ws.rs</groupId>
@@ -93,7 +93,7 @@
   <properties>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
-      <mainClass>nl.knaw.huc.di.todo_old.Todo</mainClass>
+      <mainClass>nl.knaw.huc.di.todo.Todo</mainClass>
   </properties>
 
   <build>
