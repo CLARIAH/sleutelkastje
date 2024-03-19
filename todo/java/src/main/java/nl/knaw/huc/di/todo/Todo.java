@@ -14,6 +14,10 @@ public class Todo {
   private final Map<UUID, LoginSessionData> loginSessions;
   private final OpenIdClient openIdClient;
 
+  public static void main(String[] args) {
+
+  }
+  
   public Todo(OpenIdClient openIdClient) {
     this.openIdClient = openIdClient;
     loginSessions = new ConcurrentHashMap<>();
