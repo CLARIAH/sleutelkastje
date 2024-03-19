@@ -1,24 +1,17 @@
 package nl.knaw.huc.di.todo;
 
-import com.nimbusds.oauth2.sdk.token.Tokens;
-import com.sun.org.slf4j.internal.Logger;
-import com.sun.org.slf4j.internal.LoggerFactory;
 import org.apache.commons.lang3.StringUtils;
-
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
-import java.net.URI;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Path("/openid-connect")
 public class LoginEndPoint {
-  public static final Logger LOG = LoggerFactory.getLogger(LoginEndPoint.class);
   private final Map<UUID, LoginSessionData> loginSessions;
   private final OpenIdClient openIdClient;
 
@@ -37,7 +30,7 @@ public class LoginEndPoint {
     UUID sessionId = UUID.randomUUID();
     UUID nonce = UUID.randomUUID();
 
-    loginSessions.put(sessionId, new LoginSessionData(clientRedirectUri, nonce.toString()));
+    loginSessions.put(sessionId,null);
     return openIdClient.createRedirectResponse(sessionId, nonce);
   }
 
@@ -47,21 +40,9 @@ public class LoginEndPoint {
     if (!loginSessions.containsKey(loginSession)) {
       return Response.status(417).entity("Login session unknown").build();
     }
-
-    try {
-      final LoginSessionData loginSessionData = loginSessions.remove(loginSession);
-      final Tokens userTokens = openIdClient.getUserTokens(code, loginSessionData.nonce());
-      final URI userUri = UriBuilder.fromUri(loginSessionData.userRedirectUri())
-                                    .queryParam("sessionToken", userTokens.getBearerAccessToken().getValue())
-                                    .build();
-      return Response.temporaryRedirect(userUri).build();
-    } catch (OpenIdConnectException e) {
-      LOG.error(e.getMessage(), e);
-      return Response.serverError().build();
+    return null;
+  }
+    private record LoginSessionData(String userRedirectUri, String nonce) {
     }
-  }
 
-  private record LoginSessionData(String userRedirectUri, String nonce) {
-
-  }
 }
