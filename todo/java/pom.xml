@@ -112,7 +112,7 @@
               <programs>
                 <program>
                   <id>todo-j</id>
-                  <mainClass>nl.knaw.huc.di.todo_old.Todo</mainClass>
+                  <mainClass>nl.knaw.huc.di.todo.Todo</mainClass>
                 </program>
               </programs>
             </configuration>

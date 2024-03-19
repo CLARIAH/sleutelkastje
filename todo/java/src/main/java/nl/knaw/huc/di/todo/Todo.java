@@ -11,11 +11,11 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Path("/openid-connect")
-public class LoginEndPoint {
+public class Todo {
   private final Map<UUID, LoginSessionData> loginSessions;
   private final OpenIdClient openIdClient;
 
-  public LoginEndPoint(OpenIdClient openIdClient) {
+  public Todo(OpenIdClient openIdClient) {
     this.openIdClient = openIdClient;
     loginSessions = new ConcurrentHashMap<>();
   }
