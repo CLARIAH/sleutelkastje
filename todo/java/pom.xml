@@ -77,13 +77,18 @@
       <artifactId>json-unit-core</artifactId>
       <version>2.12.0</version>
     </dependency>
+    <dependency>
+      <groupId>com.nimbusds</groupId>
+      <artifactId>oauth2-oidc-sdk</artifactId>
+      <version>11.9</version>
+    </dependency>
 
   </dependencies>
 
   <properties>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
-      <mainClass>nl.knaw.huc.di.todo.Todo</mainClass>
+      <mainClass>nl.knaw.huc.di.todo_old.Todo</mainClass>
   </properties>
 
   <build>
@@ -102,7 +107,7 @@
               <programs>
                 <program>
                   <id>todo-j</id>
-                  <mainClass>nl.knaw.huc.di.todo.Todo</mainClass>
+                  <mainClass>nl.knaw.huc.di.todo_old.Todo</mainClass>
                 </program>
               </programs>
             </configuration>
@@ -130,7 +135,15 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
-       </plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>16</source>
+          <target>16</target>
+        </configuration>
+      </plugin>
+    </plugins>
   </build>
 
 </project>
