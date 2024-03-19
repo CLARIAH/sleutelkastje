@@ -7,7 +7,7 @@ COPY ./pom.xml ./pom.xml
 
 RUN mvn clean package
 
-FROM openjdk:21-jdk-alpine
+FROM openjdk:17-jdk-alpine
 WORKDIR /
 COPY --from=builder /app/target/*.jar /app.jar
 CMD java -jar app.jar
