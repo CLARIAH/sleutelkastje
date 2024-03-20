@@ -47,6 +47,14 @@ public class Todo {
   }
 
   @GET
+  @Path("/")
+  public String donothing() {
+    String result = "do nothing";
+    System.out.println(result);
+    return result;
+  }
+
+  @GET
   @Path("/login")
   public String login(@QueryParam("redirect-uri") String clientRedirectUri) {
     System.out.println("login");
