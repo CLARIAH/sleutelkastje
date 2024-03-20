@@ -30,9 +30,16 @@ public class Todo {
     server.start();
   }
 
-  public Todo(OpenIdClient openIdClient) {
-    this.openIdClient = openIdClient;
-    loginSessions = new ConcurrentHashMap<>();
+  @GET
+  @Path("/todo")
+  public String todo(OpenIdClient openIdClient) {
+    System.out.println("todo");
+    UUID sessionId = UUID.randomUUID();
+    UUID nonce = UUID.randomUUID();
+    loginSessions.put(sessionId,null);
+    String result = openIdClient.createRedirectResponse(sessionId, nonce);
+    System.out.println(result);
+    return result;
   }
 
   @GET
