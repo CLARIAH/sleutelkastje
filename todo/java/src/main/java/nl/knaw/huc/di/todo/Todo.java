@@ -2,7 +2,6 @@ package nl.knaw.huc.di.todo;
 
 import io.javalin.Javalin;
 
-import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import java.io.IOException;
 
@@ -41,13 +40,13 @@ public class Todo {
   //   return result;
   // }
 
-  @GET
-  @Path("/")
-  public String donothing() {
-    String result = "do nothing";
-    System.out.println(result);
-    return result;
-  }
+  // @GET
+  // @Path("/")
+  // public String donothing() {
+  //   String result = "do nothing";
+  //   System.out.println(result);
+  //   return result;
+  // }
 
   // @GET
   // @Path("/login")
@@ -73,8 +72,8 @@ public class Todo {
   //   }
   //   return null;
   // }
-    private record LoginSessionData(String userRedirectUri, String nonce) {
-    }
+  //   private record LoginSessionData(String userRedirectUri, String nonce) {
+  //   }
 
 }
 
