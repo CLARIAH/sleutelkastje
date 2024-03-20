@@ -45,7 +45,9 @@ public class Todo {
   @GET
   @Path("/login")
   public String login(@QueryParam("redirect-uri") String clientRedirectUri) {
+    System.out.println("login");
     if (StringUtils.isBlank(clientRedirectUri)) {
+      System.out.println("status(400) - expected a query param redirect-uri");
       return "status(400) - expected a query param redirect-uri";
     }
 
