@@ -10,14 +10,18 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Path("/openid-connect")
 public class Todo {
   private final Map<UUID, LoginSessionData> loginSessions;
   private final OpenIdClient openIdClient;
 
-  public static void main(String[] args) throws IOException {
+    public Todo() {
+        openIdClient = null;
+        loginSessions = null;
+    }
+
+    public static void main(String[] args) throws IOException {
     System.out.println("Hello world!");
     int port = 9000;
     HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
