@@ -28,6 +28,7 @@
       <artifactId>rdf4j-shacl</artifactId>
       <version>4.0.2</version>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/io.javalin/javalin -->
     <dependency>
       <groupId>io.javalin</groupId>
       <artifactId>javalin</artifactId>
