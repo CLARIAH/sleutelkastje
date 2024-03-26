@@ -1,6 +1,7 @@
 package nl.knaw.huc.di.todo;
 
 import io.javalin.Javalin;
+import nl.knaw.huc.di.openidconnect.LoginEndPoint;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,6 +16,10 @@ public class Todo {
                          .start(9000);
         app.get("/todo", ctx -> { // the {} syntax does not allow slashes ('/') as part of the parameter
             ctx.result(getTodoList());
+        });
+        app.before(ctx -> {
+            new LoginEndPoint(null).login("");
+            // runbefore all matched requests (including static files)
         });
     }
 
