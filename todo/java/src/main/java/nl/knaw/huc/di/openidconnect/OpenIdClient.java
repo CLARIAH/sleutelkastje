@@ -29,8 +29,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 public class OpenIdClient {
@@ -42,36 +43,28 @@ public class OpenIdClient {
   private final String clientSecret;
   private final String scope;
   private final String claims;
-  private final Set<String> properties;
-
 
   public OpenIdClient(String discoveryUrl,
                       String clientId,
                       String clientSecret,
                       String scope,
                       String claims,
-                      Set<String> properties,
                       String baseUri) throws OpenIdConnectException {
     try {
       final Issuer issuer = new Issuer(discoveryUrl);
       final OIDCProviderConfigurationRequest configurationRequest = new OIDCProviderConfigurationRequest(issuer);
 
       this.metadata = OIDCProviderMetadata.parse(configurationRequest.toHTTPRequest().send().getBodyAsJSONObject());
-      this.redirectUrl = new URI(baseUri + "/openid-connect" + "/callback");
+      this.redirectUrl = new URI(baseUri + "/callback");
       this.clientId = clientId;
       this.clientSecret = clientSecret;
       this.scope = scope;
       this.claims = claims;
-      this.properties = properties;
     } catch (IOException | ParseException e) {
       throw new OpenIdConnectException("Couldn't read metadata from OIDC provider!");
     } catch (URISyntaxException e) {
         throw new RuntimeException(e);
     }
-  }
-
-  public Set<String> getProperties() {
-    return properties;
   }
 
   public Optional<UserInfo> getUserInfo(String accessToken) throws IOException, ParseException, URISyntaxException {
@@ -87,17 +80,16 @@ public class OpenIdClient {
     }
   }
 
-  public void createRedirectResponse(UUID sessionId, UUID nonce) {
-    // final URI openIdServer = fromUri(metadata.getAuthorizationEndpointURI())
-    //                                    .queryParam("response_type", "code")
-    //                                    .queryParam("client_id", clientId)
-    //                                    .queryParam("redirect_uri", redirectUrl)
-    //                                    .queryParam("scope", scope)
-    //                                    .queryParam("claims", URLEncoder.encode(claims, StandardCharsets.UTF_8))
-    //                                    .queryParam("state", sessionId)
-    //                                    .queryParam("nonce", nonce)
-    //                                    .build();
-
+  public String createRedirectResponse(UUID sessionId, UUID nonce) {
+    final String openIdServer = metadata.getAuthorizationEndpointURI()
+                                       + "?response_type=code"
+                                       +"&client_id="+clientId
+                                       +"redirect_uri="+redirectUrl
+                                       +"scope="+scope
+                                       +"claims="+ URLEncoder.encode(claims, StandardCharsets.UTF_8)
+                                       +"state="+sessionId
+                                       +"nonce="+nonce;
+    return openIdServer;
     // return Response.temporaryRedirect(openIdServer).build();
   }
 

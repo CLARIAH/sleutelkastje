@@ -1,5 +1,8 @@
 package nl.knaw.huc.di.openidconnect;
 
+import com.nimbusds.oauth2.sdk.token.Tokens;
+import io.javalin.http.Context;
+import io.javalin.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,36 +23,40 @@ public class LoginEndPoint {
 
   // @GET
   // @Path("/login")
-  public void login(){ //@QueryParam("redirect-uri") String clientRedirectUri) {
-    // if (StringUtils.isBlank(clientRedirectUri)) {
-    //   return Response.status(400).entity("expected a query param redirect-uri").build();
-    // }
-    //
-    // UUID sessionId = UUID.randomUUID();
-    // UUID nonce = UUID.randomUUID();
-    //
-    // loginSessions.put(sessionId, new LoginSessionData(clientRedirectUri, nonce.toString()));
-    // return openIdClient.createRedirectResponse(sessionId, nonce);
+  public void login(Context ctx){ //@QueryParam("redirect-uri") String clientRedirectUri) {
+    String clientRedirectUri = ctx.queryParam("redirect-uri");
+    if (clientRedirectUri.isEmpty()) {
+      ctx.status(400).result("expected a query param redirect-uri");
+      return;
+    }
+
+    UUID sessionId = UUID.randomUUID();
+    UUID nonce = UUID.randomUUID();
+
+    loginSessions.put(sessionId, new LoginSessionData(clientRedirectUri, nonce.toString()));
+    String result = openIdClient.createRedirectResponse(sessionId, nonce);
+    ctx.redirect(result, HttpStatus.TEMPORARY_REDIRECT);
   }
 
-  // @GET
-  // @Path("/callback")
-  public void callback() {//@QueryParam("state") UUID loginSession, @QueryParam("code") String code) {
-    // if (!loginSessions.containsKey(loginSession)) {
-    // //   return Response.status(417).entity("Login session unknown").build();
-    // }
-    //
-    // try {
-    //   final LoginSessionData loginSessionData = loginSessions.remove(loginSession);
-    //   final Tokens userTokens = openIdClient.getUserTokens(code, loginSessionData.nonce());
-    //   final URI userUri = UriBuilder.fromUri(loginSessionData.userRedirectUri())
-    //                                 .queryParam("sessionToken", userTokens.getBearerAccessToken().getValue())
-    //                                 .build();
-    //   return Response.temporaryRedirect(userUri).build();
-    // } catch (OpenIdConnectException e) {
-    //   LOG.error(e.getMessage(), e);
-    //   return Response.serverError().build();
-    // }
+  public void callback(Context ctx) throws OpenIdConnectException {
+    UUID loginSession = UUID.fromString(ctx.queryParam("state"));
+    String code = ctx.queryParam("code");
+
+    if (!loginSessions.containsKey(loginSession)) {
+      ctx.status(417).result("Login session unknown");
+      return;
+    }
+
+    try {
+      final LoginSessionData loginSessionData = loginSessions.remove(loginSession);
+      final Tokens userTokens = openIdClient.getUserTokens(code, loginSessionData.nonce());
+      final String userUri = loginSessionData.userRedirectUri()
+                                    + "?sessionToken=" + userTokens.getBearerAccessToken().getValue();
+      ctx.redirect(userUri, HttpStatus.TEMPORARY_REDIRECT);
+    } catch (OpenIdConnectException e) {
+      LOG.error(e.getMessage(), e);
+      throw e;
+    }
   }
 
   private record LoginSessionData(String userRedirectUri, String nonce) {

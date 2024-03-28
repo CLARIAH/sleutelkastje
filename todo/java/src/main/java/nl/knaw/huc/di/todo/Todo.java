@@ -1,6 +1,7 @@
 package nl.knaw.huc.di.todo;
 
 import io.javalin.Javalin;
+import nl.knaw.huc.di.openidconnect.LoginEndPoint;
 import nl.knaw.huc.di.openidconnect.OpenIdClient;
 import nl.knaw.huc.di.openidconnect.OpenIdConnectException;
 
@@ -8,15 +9,17 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.Set;
 
 public class Todo {
 
     public Todo() throws OpenIdConnectException {
+        OpenIdClient client = getClient();
+        LoginEndPoint lep = new LoginEndPoint(client);
         var app = Javalin.create(/*config*/)
                          .get("/", ctx -> ctx.result("Hello World"))
-                         .start(9000);
+                         .get("/login", lep::login)
+                         .get("/callback", lep::callback)
+                         .start(8000);
         // app.get("/todo", ctx -> { // the {} syntax does not allow slashes ('/') as part of the parameter
         //     if(login()) {
         //         ctx.result(getTodoList());
@@ -25,35 +28,18 @@ public class Todo {
         // LoginEndPoint endpoint = new LoginEndPoint(getOpenIdClient());
         // app.get(String.valueOf((endpoint.login("/login"))));
     }
-    //
-    // private boolean login() throws OpenIdConnectException {
-    //     boolean result = false;
-    //     String discoveryUrl = "";
-    //     String clientId = "";
-    //     String clientSecret = "";
-    //     String scope = "";
-    //     String claims = "";
-    //     String baseUri = "";
-    //     Set properties = Collections.singleton("");
-    //     OpenIdClient openIdClient =
-    //         new OpenIdClient(discoveryUrl, clientId, clientSecret, scope, claims, properties, baseUri);
-    //     Response login_result = new LoginEndPoint(openIdClient).login("");
-    //     if(!login_result.equals(null))
-    //         return true;
-    //     else
-    //         return result;
-    // }
 
-    private OpenIdClient getOpenIdClient() throws OpenIdConnectException {
-        boolean result = false;
-        String discoveryUrl = "";
-        String clientId = "";
-        String clientSecret = "";
-        String scope = "";
-        String claims = "";
-        String baseUri = "";
-        Set properties = Collections.singleton("");
-        return new OpenIdClient(discoveryUrl, clientId, clientSecret, scope, claims, properties, baseUri);
+    private OpenIdClient getClient() throws OpenIdConnectException {
+        String discoveryUrl = System.getenv("OIDC_SERVER");
+        String clientId = System.getenv("OIDC_CLIENT_ID");
+        String clientSecret = System.getenv("OIDC_CLIENT_SECRET");
+        String scope = "openid email profile";
+        String claims = "{\"userinfo\":{\"edupersontargetedid\":null,\"schac_home_organisation\":null," +
+            "\"nickname\":null,\"email\":null,\"eppn\":null,\"idp\":null}}";
+        String baseUri = System.getenv("APP_DOMAIN");
+        OpenIdClient openIdClient =
+            new OpenIdClient(discoveryUrl, clientId, clientSecret, scope, claims, baseUri);
+        return openIdClient;
     }
 
     private String getTodoList() {
