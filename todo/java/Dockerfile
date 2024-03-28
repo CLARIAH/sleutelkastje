@@ -9,6 +9,8 @@ RUN mvn clean package
 
 FROM openjdk:17-jdk-alpine
 WORKDIR /
-COPY --from=builder /app/target/*.jar /app.jar
+COPY --from=builder /app/target/todo-j-1.0-SNAPSHOT.jar /app.jar
 CMD java -jar app.jar
+
+EXPOSE 9000
 

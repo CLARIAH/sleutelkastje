@@ -1,7 +1,6 @@
 package nl.knaw.huc.di.openidconnect;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
@@ -27,16 +26,12 @@ import com.nimbusds.openid.connect.sdk.validators.IDTokenValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.net.URISyntaxException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-
-import static javax.ws.rs.core.UriBuilder.fromUri;
 
 public class OpenIdClient {
   public static final Logger LOG = LoggerFactory.getLogger(OpenIdClient.class);
@@ -49,20 +44,20 @@ public class OpenIdClient {
   private final String claims;
   private final Set<String> properties;
 
-  @JsonCreator
-  public OpenIdClient(@JsonProperty("discoveryUrl") String discoveryUrl,
-                      @JsonProperty("clientId") String clientId,
-                      @JsonProperty("clientSecret") String clientSecret,
-                      @JsonProperty("scope") String scope,
-                      @JsonProperty("claims") String claims,
-                      @JsonProperty("properties") Set<String> properties,
-                      @JsonProperty("baseUri") String baseUri) throws OpenIdConnectException {
+
+  public OpenIdClient(String discoveryUrl,
+                      String clientId,
+                      String clientSecret,
+                      String scope,
+                      String claims,
+                      Set<String> properties,
+                      String baseUri) throws OpenIdConnectException {
     try {
       final Issuer issuer = new Issuer(discoveryUrl);
       final OIDCProviderConfigurationRequest configurationRequest = new OIDCProviderConfigurationRequest(issuer);
 
       this.metadata = OIDCProviderMetadata.parse(configurationRequest.toHTTPRequest().send().getBodyAsJSONObject());
-      this.redirectUrl = fromUri(baseUri).path("openid-connect").path("callback").build();
+      this.redirectUrl = new URI(baseUri + "/openid-connect" + "/callback");
       this.clientId = clientId;
       this.clientSecret = clientSecret;
       this.scope = scope;
@@ -70,6 +65,8 @@ public class OpenIdClient {
       this.properties = properties;
     } catch (IOException | ParseException e) {
       throw new OpenIdConnectException("Couldn't read metadata from OIDC provider!");
+    } catch (URISyntaxException e) {
+        throw new RuntimeException(e);
     }
   }
 
@@ -77,8 +74,8 @@ public class OpenIdClient {
     return properties;
   }
 
-  public Optional<UserInfo> getUserInfo(String accessToken) throws IOException, ParseException {
-    final URI userInfoUri = fromUri(metadata.getUserInfoEndpointURI()).build();
+  public Optional<UserInfo> getUserInfo(String accessToken) throws IOException, ParseException, URISyntaxException {
+    final URI userInfoUri =  metadata.getUserInfoEndpointURI();
     final UserInfoRequest userInfoRequest = new UserInfoRequest(userInfoUri, new BearerAccessToken(accessToken));
     final UserInfoResponse userInfoResponse = UserInfoResponse.parse(userInfoRequest.toHTTPRequest().send());
 
@@ -90,18 +87,18 @@ public class OpenIdClient {
     }
   }
 
-  public Response createRedirectResponse(UUID sessionId, UUID nonce) {
-    final URI openIdServer = fromUri(metadata.getAuthorizationEndpointURI())
-                                       .queryParam("response_type", "code")
-                                       .queryParam("client_id", clientId)
-                                       .queryParam("redirect_uri", redirectUrl)
-                                       .queryParam("scope", scope)
-                                       .queryParam("claims", URLEncoder.encode(claims, StandardCharsets.UTF_8))
-                                       .queryParam("state", sessionId)
-                                       .queryParam("nonce", nonce)
-                                       .build();
+  public void createRedirectResponse(UUID sessionId, UUID nonce) {
+    // final URI openIdServer = fromUri(metadata.getAuthorizationEndpointURI())
+    //                                    .queryParam("response_type", "code")
+    //                                    .queryParam("client_id", clientId)
+    //                                    .queryParam("redirect_uri", redirectUrl)
+    //                                    .queryParam("scope", scope)
+    //                                    .queryParam("claims", URLEncoder.encode(claims, StandardCharsets.UTF_8))
+    //                                    .queryParam("state", sessionId)
+    //                                    .queryParam("nonce", nonce)
+    //                                    .build();
 
-    return Response.temporaryRedirect(openIdServer).build();
+    // return Response.temporaryRedirect(openIdServer).build();
   }
 
   public Tokens getUserTokens(String code, String nonce) throws OpenIdConnectException {
@@ -109,7 +106,7 @@ public class OpenIdClient {
       final IDTokenValidator validator = new IDTokenValidator(metadata.getIssuer(), new ClientID(clientId),
           metadata.getIDTokenJWSAlgs().get(0), metadata.getJWKSetURI().toURL());
       final ClientAuthentication basicAuth = new ClientSecretBasic(new ClientID(clientId), new Secret(clientSecret));
-      final URI redirectUri = fromUri(redirectUrl).build();
+      final URI redirectUri = redirectUrl;
       final AuthorizationCodeGrant authzGrant = new AuthorizationCodeGrant(new AuthorizationCode(code), redirectUri);
       final TokenRequest tokenRequest = new TokenRequest(metadata.getTokenEndpointURI(), basicAuth, authzGrant);
       final TokenResponse response = OIDCTokenResponseParser.parse(tokenRequest.toHTTPRequest().send());
