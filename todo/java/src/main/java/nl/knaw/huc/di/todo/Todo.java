@@ -19,6 +19,7 @@ public class Todo {
                          .get("/", ctx -> ctx.result("Hello World"))
                          .get("/login", lep::login)
                          .get("/callback", lep::callback)
+                         .get("/todo", ctx -> getTodoList(ctx.queryParams("eppn").toString()))
                          .start(8000);
         // app.get("/todo", ctx -> { // the {} syntax does not allow slashes ('/') as part of the parameter
         //     if(login()) {
@@ -42,12 +43,11 @@ public class Todo {
         return openIdClient;
     }
 
-    private String getTodoList() {
+    private String getTodoList(String eppn) {
         // get the epid
         String result = "No todo file. Enjoy your day!";
-        String epid = "";
-        // read the todofiles/{epid}.todo file
-        String fileName = "todofiles/" + epid;
+        // read the todofiles/{eppn}.todo file
+        String fileName = "todofiles/" + eppn + ".todo";
         try {
             result = new String(Files.readAllBytes(Paths.get(fileName)));
         } catch (IOException e) {
