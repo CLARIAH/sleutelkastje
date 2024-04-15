@@ -80,6 +80,6 @@ volumes:
 
 networks:
   sleutelkast_network:
-#    external: false
-    external:
-      name: traefik-public
+    external: true
+    name: traefik-public
+    
