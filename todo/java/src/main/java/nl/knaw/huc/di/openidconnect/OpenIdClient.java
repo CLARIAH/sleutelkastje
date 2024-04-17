@@ -38,6 +38,12 @@ public class OpenIdClient {
   public static final Logger LOG = LoggerFactory.getLogger(OpenIdClient.class);
 
   private final OIDCProviderMetadata metadata;
+  private UUID state;
+
+  public URI getRedirectUrl() {
+    return redirectUrl;
+  }
+
   private final URI redirectUrl;
   private final String clientId;
   private final String clientSecret;
@@ -84,11 +90,12 @@ public class OpenIdClient {
     final String openIdServer = metadata.getAuthorizationEndpointURI()
                                        + "?response_type=code"
                                        +"&client_id="+clientId
-                                       +"redirect_uri="+redirectUrl
-                                       +"scope="+scope
-                                       +"claims="+ URLEncoder.encode(claims, StandardCharsets.UTF_8)
-                                       +"state="+sessionId
-                                       +"nonce="+nonce;
+                                       +"&redirect_uri="+redirectUrl
+                                       +"&scope="+scope
+                                       +"&claims="+ URLEncoder.encode(claims, StandardCharsets.UTF_8)
+                                       +"&state="+sessionId
+                                       +"&nonce="+nonce;
+    this.state = sessionId;
     return openIdServer;
     // return Response.temporaryRedirect(openIdServer).build();
   }
@@ -114,5 +121,9 @@ public class OpenIdClient {
     } catch (ParseException | IOException | BadJOSEException | JOSEException e) {
       throw new OpenIdConnectException("Retrieval of tokens failed!", e);
     }
+  }
+
+  public UUID getState() {
+    return state;
   }
 }

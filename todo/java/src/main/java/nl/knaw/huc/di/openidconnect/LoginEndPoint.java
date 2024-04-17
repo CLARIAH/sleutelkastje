@@ -24,8 +24,9 @@ public class LoginEndPoint {
   // @GET
   // @Path("/login")
   public void login(Context ctx){ //@QueryParam("redirect-uri") String clientRedirectUri) {
-    String clientRedirectUri = ctx.queryParam("redirect-uri");
-    if (clientRedirectUri.isEmpty()) {
+    LOG.info("ctx:" + ctx.queryParamMap());
+    String clientRedirectUri = String.valueOf(openIdClient.getRedirectUrl()); //ctx.queryParam("redirect-uri");
+    if (clientRedirectUri==null || clientRedirectUri.isEmpty()) {
       ctx.status(400).result("expected a query param redirect-uri");
       return;
     }
@@ -35,12 +36,26 @@ public class LoginEndPoint {
 
     loginSessions.put(sessionId, new LoginSessionData(clientRedirectUri, nonce.toString()));
     String result = openIdClient.createRedirectResponse(sessionId, nonce);
+    LOG.info("result: "+result);
     ctx.redirect(result, HttpStatus.TEMPORARY_REDIRECT);
+    LOG.info("loginSessins.keySet: " + loginSessions.keySet());
+    LOG.info("loginSessins.values: " + loginSessions.values());
   }
 
   public void callback(Context ctx) throws OpenIdConnectException {
-    UUID loginSession = UUID.fromString(ctx.queryParam("state"));
+    LOG.info("ctx (callback):" + ctx.queryParamMap());
+    UUID res = openIdClient.getState();
+    LOG.info("uuid: "+res);
+    UUID loginSession;
+    try {
+      loginSession = UUID.fromString(String.valueOf(ctx.queryParam("state")));
+    } catch (IllegalArgumentException e) {
+      LOG.warn("ctx param 'state' not found!");
+      loginSession = res;
+    }
+    LOG.info("loginSession: "+loginSession);
     String code = ctx.queryParam("code");
+    LOG.info("code: "+code);
 
     if (!loginSessions.containsKey(loginSession)) {
       ctx.status(417).result("Login session unknown");
@@ -50,6 +65,7 @@ public class LoginEndPoint {
     try {
       final LoginSessionData loginSessionData = loginSessions.remove(loginSession);
       final Tokens userTokens = openIdClient.getUserTokens(code, loginSessionData.nonce());
+      LOG.info("tokens:"+userTokens);
       final String userUri = loginSessionData.userRedirectUri()
                                     + "?sessionToken=" + userTokens.getBearerAccessToken().getValue();
       ctx.redirect(userUri, HttpStatus.TEMPORARY_REDIRECT);

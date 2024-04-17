@@ -4,6 +4,8 @@ import io.javalin.Javalin;
 import nl.knaw.huc.di.openidconnect.LoginEndPoint;
 import nl.knaw.huc.di.openidconnect.OpenIdClient;
 import nl.knaw.huc.di.openidconnect.OpenIdConnectException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class Todo {
+    static final Logger LOG = LoggerFactory.getLogger(Todo.class);
 
     public Todo() throws OpenIdConnectException {
         OpenIdClient client = getClient();
@@ -19,7 +22,8 @@ public class Todo {
                          .get("/", ctx -> ctx.result("Hello World"))
                          .get("/login", lep::login)
                          .get("/callback", lep::callback)
-                         .get("/todo", ctx -> getTodoList(ctx.queryParams("eppn").toString()))
+                         .get("/todo", ctx -> ctx.result(getTodoList(ctx.queryParams("eppn").toString())))
+                          // .afterMatched(ctx -> ctx.result(getTodoList(ctx.queryParam("eppn").toString())))
                          .start(8000);
         // app.get("/todo", ctx -> { // the {} syntax does not allow slashes ('/') as part of the parameter
         //     if(login()) {
@@ -44,21 +48,23 @@ public class Todo {
     }
 
     private String getTodoList(String eppn) {
-        // get the epid
+        LOG.info("getTodolist - eppn: " + eppn);
         String result = "No todo file. Enjoy your day!";
         // read the todofiles/{eppn}.todo file
         String fileName = "todofiles/" + eppn + ".todo";
         try {
             result = new String(Files.readAllBytes(Paths.get(fileName)));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            // throw new RuntimeException(e);
+            // do nothing
         }
         // return the content
+        LOG.info(result);
         return result;
     }
 
     public static void main(String[] args) throws IOException, OpenIdConnectException {
-        System.out.println("Hello world!");
+        LOG.info("Hello world!");
         Path path = Paths.get("./todofiles");
         Files.createDirectories(path);
         new Todo();
