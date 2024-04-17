@@ -50,7 +50,7 @@ services:
       OIDC_CLIENT_ID: "nl_knaw_huc_di_sd_todo-j" 
       OIDC_CLIENT_SECRET: "5RKBN2siBqLq9MUHXlKZ" 
     image:
-      registry.diginfra.net/tsd/todo-j:20240411
+      registry.diginfra.net/tsd/sleutelkastje-todo-j:20240416
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sleutelkast-todo-j.entrypoints=http"
@@ -82,5 +82,5 @@ volumes:
 networks:
   sleutelkast_network:
 #    external: false
-    external:
-      name: traefik-public
+    external: true
+    name: traefik-public
