@@ -49,12 +49,7 @@ services:
       OIDC_SERVER: "https://testauthentication.di.huc.knaw.nl"
       OIDC_CLIENT_ID: "nl_knaw_huc_di_sd_todo-j" 
       OIDC_CLIENT_SECRET: "5RKBN2siBqLq9MUHXlKZ" 
-<<<<<<< HEAD
-    image:
-      registry.diginfra.net/tsd/sleutelkastje-todo-j:20240416
-=======
     image: registry.diginfra.net/tsd/sleutelkastje-todo-j:20240416
->>>>>>> cc89a6d63bc0717bda8ea487fc48876e2c6694eb
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sleutelkast-todo-j.entrypoints=http"
@@ -85,12 +80,5 @@ volumes:
 
 networks:
   sleutelkast_network:
-<<<<<<< HEAD
-#    external: false
     external: true
     name: traefik-public
-=======
-    external: true
-    name: traefik-public
-    
->>>>>>> cc89a6d63bc0717bda8ea487fc48876e2c6694eb
