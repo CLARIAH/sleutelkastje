@@ -13,6 +13,7 @@ import string
 import sys
 from werkzeug.security import generate_password_hash, check_password_hash
 import uuid
+import jwt
 
 from flask_pyoidc import OIDCAuthentication
 from flask_pyoidc.provider_configuration import ProviderConfiguration, ClientMetadata
@@ -74,7 +75,7 @@ def add_app(application):
     url = body['redirect']
     logging.debug(f'add app[{application}] - cred[{cred}] - url[{url}]')
     # add app to database
-    cur.execute('INSERT INTO application(mnemonic, credentials, redirect) VALUES (%s, %s, %s)',
+    cur.execute('INSERT INTO application(mnemonic, credentials, redirect) VALUES (%s, %s, %s) ON CONFLICT (mnemonic) DO UPDATE SET credentials=excluded.credentials, redirect=excluded.redirect',
                 (application, generate_password_hash(cred), url))
     conn.commit()
     #TODO 20240304: add <app>, generate_password_hash(<cred>) also to users dictionary
@@ -145,6 +146,21 @@ def get_api_key(length=16):
     return f'huc:{key}'
 
 
+def get_jwt_key(user_id: str):
+    """
+    Get a JWT key
+    :param user_id:
+    :return:
+    """
+    secret_key = "some-test-secret"
+    encoded = jwt.encode({
+        'user_id': user_id,
+        'iat': datetime.datetime.utcnow(),
+        'iss': 'urn:knaw-huc',
+    }, secret_key, algorithm='HS256')
+    return encoded
+
+
 def get_invite(length=8):
     key = ''
     for i in range(length):
@@ -179,7 +195,8 @@ def register(invite):
     cur.execute('UPDATE invitation SET usr = %s WHERE _id = %s', [user_id, inv_id])
     conn.commit()
     # 5. make api_key
-    api_key = get_api_key()
+    # api_key = get_api_key()
+    api_key = get_jwt_key(usr_id)
     cur.execute('INSERT INTO key(key, usr) VALUES (%s, %s)', (api_key, user_id))
     conn.commit()
     eppn = userinfo['eppn'][0]

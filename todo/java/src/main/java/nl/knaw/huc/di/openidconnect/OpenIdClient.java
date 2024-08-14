@@ -23,6 +23,7 @@ import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderConfigurationRequest;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.openid.connect.sdk.validators.IDTokenValidator;
+import nl.knaw.huc.di.todo.exceptions.InvalidTokenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +32,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -86,6 +88,23 @@ public class OpenIdClient {
     }
   }
 
+  public String getUserEppn(String accessToken) throws InvalidTokenException {
+    Optional<UserInfo> userInfo = Optional.empty();
+    try {
+      userInfo = getUserInfo(accessToken);
+    } catch (IOException | URISyntaxException | ParseException e) {
+      throw new InvalidTokenException();
+    }
+    if (userInfo.isPresent()) {
+      UserInfo info = userInfo.get();
+      List<String> claimList = info.getStringListClaim("eppn");
+      if (claimList != null) {
+        return claimList.get(0);
+      }
+    }
+    throw new InvalidTokenException();
+  }
+
   public String createRedirectResponse(UUID sessionId, UUID nonce) {
     final String openIdServer = metadata.getAuthorizationEndpointURI()
                                        + "?response_type=code"
@@ -122,6 +141,7 @@ public class OpenIdClient {
       throw new OpenIdConnectException("Retrieval of tokens failed!", e);
     }
   }
+
 
   public UUID getState() {
     return state;

@@ -3,6 +3,7 @@ package nl.knaw.huc.di.openidconnect;
 import com.nimbusds.oauth2.sdk.token.Tokens;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
+import nl.knaw.huc.di.todo.exceptions.InvalidTokenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +26,7 @@ public class LoginEndPoint {
   // @Path("/login")
   public void login(Context ctx){ //@QueryParam("redirect-uri") String clientRedirectUri) {
     LOG.info("ctx:" + ctx.queryParamMap());
-    String clientRedirectUri = String.valueOf(openIdClient.getRedirectUrl()); //ctx.queryParam("redirect-uri");
+    String clientRedirectUri = String.valueOf("/todo"); //ctx.queryParam("redirect-uri");
     if (clientRedirectUri==null || clientRedirectUri.isEmpty()) {
       ctx.status(400).result("expected a query param redirect-uri");
       return;
@@ -42,7 +43,7 @@ public class LoginEndPoint {
     LOG.info("loginSessins.values: " + loginSessions.values());
   }
 
-  public void callback(Context ctx) throws OpenIdConnectException {
+  public void callback(Context ctx) throws OpenIdConnectException, InvalidTokenException {
     LOG.info("ctx (callback):" + ctx.queryParamMap());
     UUID res = openIdClient.getState();
     LOG.info("uuid: "+res);
@@ -58,7 +59,7 @@ public class LoginEndPoint {
     LOG.info("code: "+code);
 
     if (!loginSessions.containsKey(loginSession)) {
-      ctx.status(417).result("Login session unknown");
+      ctx.status(400).result("Login session unknown");
       return;
     }
 
@@ -66,10 +67,13 @@ public class LoginEndPoint {
       final LoginSessionData loginSessionData = loginSessions.remove(loginSession);
       final Tokens userTokens = openIdClient.getUserTokens(code, loginSessionData.nonce());
       LOG.info("tokens:"+userTokens);
-      final String userUri = loginSessionData.userRedirectUri()
-                                    + "?sessionToken=" + userTokens.getBearerAccessToken().getValue();
+
+      String eppn = openIdClient.getUserEppn(userTokens.getBearerAccessToken().toString());
+      ctx.sessionAttribute("eppn", eppn);
+
+      final String userUri = loginSessionData.userRedirectUri();
       ctx.redirect(userUri, HttpStatus.TEMPORARY_REDIRECT);
-    } catch (OpenIdConnectException e) {
+    } catch (OpenIdConnectException | InvalidTokenException e) {
       LOG.error(e.getMessage(), e);
       throw e;
     }

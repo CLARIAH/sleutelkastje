@@ -1,7 +1,7 @@
         DROP TABLE IF EXISTS application CASCADE;
         CREATE TABLE application (
             _id SERIAL PRIMARY KEY,
-            mnemonic TEXT NOT NULL,
+            mnemonic TEXT NOT NULL UNIQUE,
             credentials TEXT NOT NULL,
             redirect TEXT NOT NULL,
             funcPerson TEXT
