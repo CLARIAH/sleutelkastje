@@ -33,6 +33,7 @@ public class Todo {
                 .get("/login", lep::login)
                 .get("/callback", lep::callback)
                 .get("/todo", todo::getTodoList)
+                .post("/todo", todo::addTodo)
                 .start(8000);
     }
 

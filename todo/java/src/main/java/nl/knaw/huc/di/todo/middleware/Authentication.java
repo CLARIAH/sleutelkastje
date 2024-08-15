@@ -15,7 +15,8 @@ import org.slf4j.LoggerFactory;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class Authentication {
+public class Authentication
+{
     static final Logger LOG = LoggerFactory.getLogger(Todo.class);
 
     OpenIdClient openIdClient;
@@ -33,7 +34,8 @@ public class Authentication {
      * the sessionToken request parameter.
      * @param ctx The Javalin Context
      */
-    public void handleAuthentication(Context ctx) {
+    public void handleAuthentication(Context ctx)
+    {
         String eppn;
 
         String sessionEppn = ctx.sessionAttribute("eppn");
@@ -83,7 +85,8 @@ public class Authentication {
      * @return The eppn
      * @throws SleutelkastUnreachableException When we cannot reach the sleutelkast api.
      */
-    private String getEppnHuc(String token) throws MalformedURLException, SleutelkastUnreachableException {
+    private String getEppnHuc(String token) throws MalformedURLException, SleutelkastUnreachableException
+    {
         // handle sleutelkastje
         LOG.info("Create URL object");
         URL url = new URL("https://sleutelkast.sd.di.huc.knaw.nl/todo");
@@ -99,7 +102,8 @@ public class Authentication {
      * @return The EPPN
      * @throws InvalidTokenException When the token is invalid and no EPPN can be found.
      */
-    private String getEppnSatosa(String token) throws InvalidTokenException {
+    private String getEppnSatosa(String token) throws InvalidTokenException
+    {
         return openIdClient.getUserEppn(token);
     }
 
@@ -110,7 +114,8 @@ public class Authentication {
      * @throws InvalidTokenException When the token is invalid and authentication fails.
      * @throws MalformedURLException When the Sleutelkastje URL is misconfigured.
      */
-    private String getEppnFromToken(String token) throws InvalidTokenException, MalformedURLException, SleutelkastUnreachableException {
+    private String getEppnFromToken(String token) throws InvalidTokenException, MalformedURLException, SleutelkastUnreachableException
+    {
         LOG.info("Trying to get eppn from token: {}", token);
         if (token.startsWith("huc:")) {
             LOG.info("Starts with huc, checking Sleutelkastje");
