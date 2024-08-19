@@ -5,19 +5,15 @@ import io.javalin.http.InternalServerErrorResponse;
 import io.javalin.http.UnauthorizedResponse;
 import nl.knaw.huc.di.openidconnect.OpenIdClient;
 import nl.knaw.huc.di.sleutelkast.SleutelkastClient;
-import nl.knaw.huc.di.todo.Todo;
+import nl.knaw.huc.di.todo.dataclasses.UserData;
 import nl.knaw.huc.di.todo.exceptions.InvalidTokenException;
 import nl.knaw.huc.di.todo.exceptions.SleutelkastUnreachableException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 public class Authentication
 {
-    static final Logger LOG = LoggerFactory.getLogger(Todo.class);
+    static final Logger LOG = LoggerFactory.getLogger(Authentication.class);
 
     OpenIdClient openIdClient;
     SleutelkastClient sleutelClient;
@@ -50,12 +46,11 @@ public class Authentication
             eppn = getEppnFromToken(accessToken);
         } catch (InvalidTokenException e) {
             throw new UnauthorizedResponse("Unauthorized");
-        } catch (MalformedURLException e) {
-            throw new InternalServerErrorResponse("Invalid Sleutelkastje URL configuration");
         } catch (SleutelkastUnreachableException e) {
             throw new InternalServerErrorResponse("Sleutelkastje unreachable");
         }
 
+        LOG.info("Authenticated {}", eppn);
         ctx.attribute("eppn", eppn);
     }
 
@@ -85,15 +80,10 @@ public class Authentication
      * @return The eppn
      * @throws SleutelkastUnreachableException When we cannot reach the sleutelkast api.
      */
-    private String getEppnHuc(String token) throws MalformedURLException, SleutelkastUnreachableException
+    private String getEppnHuc(String token) throws SleutelkastUnreachableException
     {
-        // handle sleutelkastje
-        LOG.info("Create URL object");
-        URL url = new URL("https://sleutelkast.sd.di.huc.knaw.nl/todo");
-
-        JSONObject obj = sleutelClient.getUserData(token);
-
-        return obj.getJSONArray("eppn").getString(0);
+        UserData obj = sleutelClient.getUserData(token);
+        return obj.eppn[0];
     }
 
     /**
@@ -112,11 +102,10 @@ public class Authentication
      * @param token The authentication token.
      * @return The EPPN of the user.
      * @throws InvalidTokenException When the token is invalid and authentication fails.
-     * @throws MalformedURLException When the Sleutelkastje URL is misconfigured.
      */
-    private String getEppnFromToken(String token) throws InvalidTokenException, MalformedURLException, SleutelkastUnreachableException
+    private String getEppnFromToken(String token) throws InvalidTokenException, SleutelkastUnreachableException
     {
-        LOG.info("Trying to get eppn from token: {}", token);
+        LOG.info("Getting user based on API key");
         if (token.startsWith("huc:")) {
             LOG.info("Starts with huc, checking Sleutelkastje");
             return getEppnHuc(token);

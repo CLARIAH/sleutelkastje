@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -21,13 +21,14 @@ public class Todo {
 
     OpenIdClient openIdClient;
 
-    public Todo() throws OpenIdConnectException, MalformedURLException {
+    public Todo() throws OpenIdConnectException, URISyntaxException
+    {
         openIdClient = getOpenIdClient();
         SleutelkastClient sleutelkastClient = new SleutelkastClient("todo", "ookgeheim");
         Authentication auth = new Authentication(openIdClient, sleutelkastClient);
         LoginEndPoint lep = new LoginEndPoint(openIdClient);
         TodoController todo = new TodoController();
-        var app = Javalin.create(/*config*/)
+        var app = Javalin.create()
                 .before("/todo", auth::handleAuthentication)
                 .get("/", ctx -> ctx.result("Hello World"))
                 .get("/login", lep::login)
@@ -50,7 +51,8 @@ public class Todo {
         return openIdClient;
     }
 
-    public static void main(String[] args) throws IOException, OpenIdConnectException {
+    public static void main(String[] args) throws IOException, OpenIdConnectException, URISyntaxException
+    {
         LOG.info("Hello world!");
         Path path = Paths.get("./todofiles");
         Files.createDirectories(path);

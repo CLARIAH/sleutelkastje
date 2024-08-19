@@ -3,8 +3,7 @@ package nl.knaw.huc.di.todo.controllers;
 import io.javalin.http.BadRequestResponse;
 import io.javalin.http.Context;
 import io.javalin.http.InternalServerErrorResponse;
-import nl.knaw.huc.di.todo.Todo;
-import nl.knaw.huc.di.todo.requests.CreateTodoRequest;
+import nl.knaw.huc.di.todo.dataclasses.CreateTodoRequest;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -15,9 +14,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
-public class TodoController {
-
-    static final Logger LOG = LoggerFactory.getLogger(Todo.class);
+public class TodoController
+{
+    static final Logger LOG = LoggerFactory.getLogger(TodoController.class);
 
     /**
      * Get the to do list of the currently logged-in user.
@@ -34,7 +33,7 @@ public class TodoController {
         try {
            todos.putAll(Files.readAllLines(Paths.get(fileName)));
         } catch (Exception e) {
-            LOG.error("get todo error", e);
+            LOG.info("No todo file, nothing to do!");
             // do nothing
         }
 

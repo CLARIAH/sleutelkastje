@@ -26,7 +26,7 @@ public class LoginEndPoint {
   // @Path("/login")
   public void login(Context ctx){ //@QueryParam("redirect-uri") String clientRedirectUri) {
     LOG.info("ctx:" + ctx.queryParamMap());
-    String clientRedirectUri = String.valueOf("/todo"); //ctx.queryParam("redirect-uri");
+    String clientRedirectUri = "/todo"; //ctx.queryParam("redirect-uri");
     if (clientRedirectUri==null || clientRedirectUri.isEmpty()) {
       ctx.status(400).result("expected a query param redirect-uri");
       return;
