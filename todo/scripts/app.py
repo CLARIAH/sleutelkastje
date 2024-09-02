@@ -1,21 +1,16 @@
-# -*- coding: utf-8 -*-
 import datetime
 import functools
-import flask
-from flask import Flask, Response, render_template, request, flash, redirect, url_for, make_response, jsonify
-from flask_httpauth import HTTPBasicAuth
 import logging
 import os
-#import psycopg2
-import requests
-import secrets
-import string
 import sys
-from werkzeug.security import generate_password_hash, check_password_hash
 import uuid
 
+import flask
+import requests
+from flask import Flask, jsonify, make_response, request
+from flask_httpauth import HTTPBasicAuth
 from flask_pyoidc import OIDCAuthentication
-from flask_pyoidc.provider_configuration import ProviderConfiguration, ClientMetadata
+from flask_pyoidc.provider_configuration import ClientMetadata, ProviderConfiguration
 from flask_pyoidc.user_session import UserSession
 
 app = Flask(__name__)

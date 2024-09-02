@@ -1,9 +1,9 @@
 FROM python:3.9-slim
 
-ADD scripts ./
+ADD sleutelkastje ./sleutelkastje
 
-RUN pip install -r requirements.txt
+RUN pip install -r sleutelkastje/requirements.txt
 
-CMD ["gunicorn", "-b", ":5000", "-t", "60", "-w", "1", "--threads", "4", "app:app"]
+CMD ["gunicorn", "-b", ":5000", "-t", "60", "-w", "1", "--threads", "4", "sleutelkastje:app"]
 
 EXPOSE 5000
