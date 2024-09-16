@@ -5,6 +5,7 @@ import nl.knaw.huc.di.openidconnect.LoginEndPoint;
 import nl.knaw.huc.di.openidconnect.OpenIdClient;
 import nl.knaw.huc.di.openidconnect.OpenIdConnectException;
 import nl.knaw.huc.di.sleutelkast.SleutelkastClient;
+import nl.knaw.huc.di.sleutelkast.exceptions.UnauthorizedException;
 import nl.knaw.huc.di.todo.controllers.TodoController;
 import nl.knaw.huc.di.todo.middleware.Authentication;
 import org.slf4j.Logger;
@@ -24,10 +25,15 @@ public class Todo {
     public Todo() throws OpenIdConnectException, URISyntaxException
     {
         openIdClient = getOpenIdClient();
-        SleutelkastClient sleutelkastClient = new SleutelkastClient("todo", "ookgeheim");
+        SleutelkastClient sleutelkastClient = new SleutelkastClient(
+                "https://sleutelkast.sd.di.huc.knaw.nl",
+                "todo",
+                "ookgeheim"
+        );
         Authentication auth = new Authentication(openIdClient, sleutelkastClient);
         LoginEndPoint lep = new LoginEndPoint(openIdClient);
         TodoController todo = new TodoController();
+
         var app = Javalin.create()
                 .before("/todo", auth::handleAuthentication)
                 .get("/", ctx -> ctx.result("Hello World"))
@@ -46,9 +52,7 @@ public class Todo {
         String claims = "{\"userinfo\":{\"edupersontargetedid\":null,\"schac_home_organisation\":null," +
                 "\"nickname\":null,\"email\":null,\"eppn\":null,\"idp\":null}}";
         String baseUri = System.getenv("APP_DOMAIN");
-        OpenIdClient openIdClient =
-                new OpenIdClient(discoveryUrl, clientId, clientSecret, scope, claims, baseUri);
-        return openIdClient;
+        return new OpenIdClient(discoveryUrl, clientId, clientSecret, scope, claims, baseUri);
     }
 
     public static void main(String[] args) throws IOException, OpenIdConnectException, URISyntaxException

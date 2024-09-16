@@ -15,7 +15,7 @@ class User(db.Model):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
     username: orm.Mapped[str] = orm.mapped_column(unique=True)
     user_info: orm.Mapped[JSON] = orm.mapped_column(type_=JSON)
-    password_hash: orm.Mapped[str] = orm.mapped_column(type_=JSON, nullable=True)
+    password_hash: orm.Mapped[str] = orm.mapped_column(nullable=True)
 
     invitations: orm.Mapped[List['Invitation']] = orm.relationship(back_populates="user")
     applications: orm.Mapped[List['Application']] = orm.relationship(back_populates="functional_admin")

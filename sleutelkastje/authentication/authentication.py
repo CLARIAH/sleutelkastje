@@ -58,7 +58,7 @@ def hash_password(password):
         return generate_password_hash(password, method='pbkdf2')
 
 
-def get_api_key(length=16):
+def get_api_key(length=48):
     key = ''
     for i in range(length):
         key += ''.join(secrets.choice(alphabet))

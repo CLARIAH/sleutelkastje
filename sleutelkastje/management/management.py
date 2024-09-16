@@ -25,7 +25,7 @@ def is_func(app, eppn):
     return eppn == functional_admin.username
 
 
-def get_invite(length=8):
+def get_invite(length=48):
     key = ''
     for i in range(length):
         key += ''.join(secrets.choice(letters + digits))

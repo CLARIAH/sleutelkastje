@@ -47,6 +47,12 @@
             <version>2.17.2</version>
         </dependency>
 
+        <dependency>
+            <groupId>nl.knaw.huc.di</groupId>
+            <artifactId>sleutelkast-client</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+
     </dependencies>
 
     <properties>
@@ -54,6 +60,26 @@
         <maven.compiler.target>22</maven.compiler.target>
         <mainClass>nl.knaw.huc.di.todo.Todo</mainClass>
     </properties>
+
+
+    <repositories>
+        <repository>
+            <id>gitlab-maven</id>
+            <url>https://gitlab.huc.knaw.nl/api/v4/projects/33/packages/maven</url>
+        </repository>
+    </repositories>
+
+    <distributionManagement>
+        <repository>
+            <id>gitlab-maven</id>
+            <url>https://gitlab.huc.knaw.nl/api/v4/projects/33/packages/maven</url>
+        </repository>
+
+        <snapshotRepository>
+            <id>gitlab-maven</id>
+            <url>https://gitlab.huc.knaw.nl/api/v4/projects/33/packages/maven</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <build>
         <plugins>

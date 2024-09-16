@@ -4,12 +4,12 @@ from flask import jsonify, make_response, render_template, request, session
 from flask_pyoidc.user_session import UserSession
 
 from sleutelkastje.application import db
-from sleutelkastje.authentication import User, auth, get_api_key, oidc_auth
+from sleutelkastje.authentication import User, auth, get_api_key, hash_password, oidc_auth
 from sleutelkastje.management import Invitation, Key, bp, get_invite, is_func, key_valid
 from sleutelkastje.sysop import Application
 
 
-@bp.route('/invite/<app>', methods=['GET'])
+@bp.route('/<app>/invite', methods=['GET'])
 @oidc_auth.oidc_auth('default')
 def invite(app):
     """
@@ -51,7 +51,8 @@ def register(invite_id: str):
 
     invite = db.session.query(Invitation).filter_by(uuid=invite_id).first_or_404()
     if invite.user_id is not None:
-        return "Invitation has been used"
+        response = make_response(render_template('invitation_used.html'), 200)
+        return response
 
     user = db.session.query(User).filter_by(username=userinfo['eppn'][0]).first()
     if user is None:
@@ -71,8 +72,10 @@ def register(invite_id: str):
     invite.user = user
     db.session.commit()
 
+    key_plain = get_api_key()
+
     key = Key(
-        key=get_api_key(),
+        key=key_plain,
         user=user
     )
 
@@ -83,16 +86,19 @@ def register(invite_id: str):
     application = invite.application
     # check result
     appl = application.mnemonic
-    response = make_response(render_template('accepted.html', person=eppn, app=appl, key=key.key), 200)
+    response = make_response(render_template('accepted.html', person=eppn, app=appl, key=key_plain), 200)
     return response
 
 
-@bp.route('/<appl>', methods=['POST'])
+@bp.route('/<appl>/validate', methods=['POST'])
 @auth.login_required
 def post_appl(appl: str):
     if auth.current_user() != appl and auth.current_role() != 'sysop':
         logging.debug(f'error: unauthorized - status: 401')
-        return jsonify({'error': 'unauthorized', 'status': 401})
+        return make_response(jsonify({
+            'status': 'error',
+            'message': 'you are not allowed to validate API keys for this application',
+        }), 403)
 
     key = request.values["key"]
     logging.debug(f'key: {key}')
@@ -100,7 +106,13 @@ def post_appl(appl: str):
     api_key, valid = key_valid(key, appl)
 
     if not valid:
-        return make_response('unknown api key', 401)
+        return make_response(
+            jsonify({
+                'status': 'unauthorized',
+                'message': 'submitted API key is not known',
+            }),
+            401
+        )
 
     user_info = api_key.user.user_info
     return jsonify(user_info)

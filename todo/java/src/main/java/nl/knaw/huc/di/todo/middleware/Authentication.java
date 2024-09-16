@@ -5,9 +5,11 @@ import io.javalin.http.InternalServerErrorResponse;
 import io.javalin.http.UnauthorizedResponse;
 import nl.knaw.huc.di.openidconnect.OpenIdClient;
 import nl.knaw.huc.di.sleutelkast.SleutelkastClient;
-import nl.knaw.huc.di.todo.dataclasses.UserData;
+import nl.knaw.huc.di.sleutelkast.exceptions.SleutelkastUnreachableException;
+import nl.knaw.huc.di.sleutelkast.dataclasses.UserData;
+import nl.knaw.huc.di.sleutelkast.exceptions.UnauthorizedException;
+import nl.knaw.huc.di.todo.exceptions.AuthenticationException;
 import nl.knaw.huc.di.todo.exceptions.InvalidTokenException;
-import nl.knaw.huc.di.todo.exceptions.SleutelkastUnreachableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,10 +46,8 @@ public class Authentication
 
         try {
             eppn = getEppnFromToken(accessToken);
-        } catch (InvalidTokenException e) {
+        } catch (AuthenticationException e) {
             throw new UnauthorizedResponse("Unauthorized");
-        } catch (SleutelkastUnreachableException e) {
-            throw new InternalServerErrorResponse("Sleutelkastje unreachable");
         }
 
         LOG.info("Authenticated {}", eppn);
@@ -76,11 +76,13 @@ public class Authentication
 
     /**
      * Get the user eppn using a sleutelkast api key.
+     *
      * @param token The authentication token/api key
      * @return The eppn
      * @throws SleutelkastUnreachableException When we cannot reach the sleutelkast api.
+     * @throws UnauthorizedException When the key is incorrect or the user is not allowed to use this app.
      */
-    private String getEppnHuc(String token) throws SleutelkastUnreachableException
+    private String getEppnHuc(String token) throws SleutelkastUnreachableException, UnauthorizedException
     {
         UserData obj = sleutelClient.getUserData(token);
         return obj.eppn[0];
@@ -101,17 +103,22 @@ public class Authentication
      * Get the EPPN based on the authentication. Deals with both Sleutelkastje tokens and Satosa ones.
      * @param token The authentication token.
      * @return The EPPN of the user.
-     * @throws InvalidTokenException When the token is invalid and authentication fails.
+     * @throws AuthenticationException When there is a problem with the authentication.
      */
-    private String getEppnFromToken(String token) throws InvalidTokenException, SleutelkastUnreachableException
+    private String getEppnFromToken(String token) throws AuthenticationException
     {
         LOG.info("Getting user based on API key");
-        if (token.startsWith("huc:")) {
-            LOG.info("Starts with huc, checking Sleutelkastje");
-            return getEppnHuc(token);
-        } else {
-            LOG.info("Check Satosa");
-            return getEppnSatosa(token);
+        try {
+            if (token.startsWith("huc:")) {
+                LOG.info("Starts with huc, checking Sleutelkastje");
+                return getEppnHuc(token);
+            } else {
+                LOG.info("Check Satosa");
+                return getEppnSatosa(token);
+            }
+        } catch (SleutelkastUnreachableException | InvalidTokenException | UnauthorizedException e) {
+            LOG.error("{}: {}", e.getClass().getSimpleName(), e.getMessage());
+            throw new AuthenticationException();
         }
     }
 }
