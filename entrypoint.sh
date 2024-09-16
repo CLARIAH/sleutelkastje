@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 flask --app sleutelkastje db upgrade
 
-gunicorn -b :5000 -t 60 -w 1 --threads 4 sleuelkastje:app
+gunicorn -b ":5000" -t 60 -w 1 --threads 4 "sleutelkastje:app"

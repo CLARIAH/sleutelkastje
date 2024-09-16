@@ -1,9 +1,54 @@
-<!doctype html>
-<html>
-   <head>
-<title>invitation</title>
-   </head>
-   <body>
-       <p><a href="/register/{{invite}}">invitation</a> for <b>{{app}}</b></p>
-   </body>
-</html>
+{% extends "base.html" %}
+{% block title %}Invitation created{% endblock %}
+
+{% block content %}
+    <div class="row justify-content-around">
+        <div class="col-12 col-md-8 col-lg-7 col-xl-6">
+            <div class="card mt-5">
+                <div class="card-body">
+                    <h5 class="card-title">Invitation Created</h5>
+                    <p>
+                        You can now invite a user to use {{ app }}. Send the following URI to allow them to sign up.
+                    </p>
+                    <label for="api-key" class="form-label">Invitation link</label>
+                    <div class="input-group">
+                        <input type="text" disabled="disabled" id="api-key" class="form-control" value="" />
+                        <button onclick="copyToClipboard()" class="btn btn-outline-primary" type="button" aria-describedby="api-key-info">Copy</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="success-toast" class="toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    Invitation copied!
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block scripts %}
+    <script>
+
+        const successToast = document.getElementById('success-toast');
+        const urlInput = document.querySelector("#api-key");
+
+        const invitationId = "{{ invite }}";
+        urlInput.value = window.location.origin + '/register/' + invitationId;
+
+        const copyToClipboard = async () => {
+            try {
+                await navigator.clipboard.writeText(urlInput.value);
+
+                const toastBootstrap = bootstrap.Toast.getOrCreateInstance(successToast);
+                toastBootstrap.show();
+            } catch (error) {
+                console.error("Failed to copy to clipboard:", error)
+            }
+        }
+    </script>
+{% endblock %}
