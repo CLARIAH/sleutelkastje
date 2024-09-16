@@ -1,37 +1,56 @@
 @startuml
 hide circle
-' skinparam linetype ortho
 
 entity "Application" as app {
   * mnemonic: string
   --
-  * credentials : text
+  *credentials : text
   *redirect : text
-    'eppn:... eptid:...
   funcPerson : text
+}
+
+entity "Item" as item {
+    indent: string
 }
 
 entity "Invitation" as invite {
     *i: uuidd
+    Item?: string
+    role?: string
+}
+
+entity "Uses Item" as ui {
+    role?: string
+}
+
+entity "Uses App" as ua {
+    role?: string
 }
 
 entity "Users" as user {
-     'eppn:... eptid:...
-   * ident: text, e.g "eppn:gghhhg" or "eptid:jkhhkjhkjhjkh"
+   * ident: text
     --
     user info: json
+    extra info*: string
     keys: json
 }
 
 entity "Key" as key {
-    *key: secret, e.g "huc:ghfjhgfghfhgjfhgf"
+    *key: secret
     --
     ttl: ...
 }
 
 app ||--o{ invite
-user ||--o| key
-key ||--||app
-invite ||--o| user
+user ||--o{ key
+key |o--|| app
+app ||--o| user
+app ||--o{ item
+item }o--o{ user
+invite }o---o| item
+user ||--o{ ui
+item ||--o{ ui
+user ||--o{ ua
+app ||--o{ ua
 
 @enduml
