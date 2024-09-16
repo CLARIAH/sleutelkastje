@@ -17,7 +17,8 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.sleutelkast.entrypoints=http"
       - "traefik.http.routers.sleutelkast.rule=Host(`sleutelkast.sd.di.huc.knaw.nl`)"
-    build: .
+#    build: .
+    image: registry.diginfra.net/tsd/sleutelkastje:latest
     ports:
       - "3010:5000"
     depends_on:
