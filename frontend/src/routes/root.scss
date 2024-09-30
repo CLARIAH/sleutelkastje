@@ -1,0 +1,18 @@
+#root {
+  font-family: Roboto, sans-serif;
+}
+
+#background {
+  background-image: radial-gradient(ellipse at 50% 50%, hsl(210, 100%, 97%), hsl(0, 0%, 100%));
+  background-repeat: no-repeat;
+  z-index: -10000;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+:root {
+  --monospace-font: 'Victor Mono'
+}

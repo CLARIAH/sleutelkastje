@@ -1,13 +1,11 @@
-import logging
 import re
 import secrets
 import string
 from typing import Optional
 
 from sleutelkastje.application import db
-from sleutelkastje.management import Key
-from sleutelkastje.sysop import Application
-
+from sleutelkastje.authentication import Key
+from sleutelkastje.sysop import Application, ApplicationUserAssociation
 
 letters = string.ascii_letters
 digits = string.digits
@@ -15,14 +13,15 @@ special_chars = re.sub(r'["\'\\!]', '', string.punctuation)
 alphabet = letters + digits + special_chars
 
 
-def is_func(app, eppn):
-    # cur.execute("SELECT funcPerson FROM application WHERE mnemonic = %s", [app])
+def is_func(app: str, user_id: int) -> bool:
     application = db.session.query(Application).filter_by(mnemonic=app).first()
-    functional_admin = application.functional_admin
-    if functional_admin is None:
+    application_association = (db.session.query(ApplicationUserAssociation)
+                               .filter_by(app_id=application.id, user_id=user_id)).one_or_none()
+
+    if application_association is None:
         return False
-    logging.debug(f'fp: {functional_admin.username} ({eppn == functional_admin.username})')
-    return eppn == functional_admin.username
+
+    return application_association.role == 'operator'
 
 
 def get_invite(length=48):

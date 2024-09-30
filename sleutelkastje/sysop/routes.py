@@ -1,15 +1,27 @@
-from sleutelkastje.sysop import Application, bp
+from flask_login import current_user, login_required
+
+from sleutelkastje import app
+from sleutelkastje.management import Invitation, get_invite
+from sleutelkastje.sysop import Application, ApplicationUserAssociation, bp
 from sleutelkastje.application import db
-from sleutelkastje.authentication import User, hash_password, auth
-from sleutelkastje.database import users
+from sleutelkastje.authentication import User, hash_password, permission
 
 import logging
 
 from flask import jsonify, request, make_response, render_template
 
 
-@bp.route('/<application>', methods=['PUT'])
-@auth.login_required(role='sysop')
+def is_sysop():
+    """
+    Permission check for sysop
+    :return:
+    """
+    return current_user.role == 'sysop'
+
+
+@bp.route('/apps/<application>', methods=['PUT'])
+@login_required
+@permission(is_sysop)
 def add_app(application):
     """
     Create a new application.
@@ -19,68 +31,93 @@ def add_app(application):
     body = request.get_json()
     cred = body['credentials']
     url = body['redirect']
+    name = body['name']
     logging.debug(f'add app[{application}] - cred[{cred}] - url[{url}]')
-    app = db.session.query(Application).filter_by(mnemonic=application).first()
+    app_object = db.session.query(Application).filter_by(mnemonic=application).first()
 
     status: str
-    if app is None:
-        app = Application(
+    if app_object is None:
+        app_object = Application(
             mnemonic=application,
             credentials=hash_password(cred),
+            name=name,
             redirect=url,
         )
-        db.session.add(app)
+        db.session.add(app_object)
         status, code = 'created', 201
+        user = User(
+            username=application,
+            password_hash=hash_password(cred),
+            user_info={}
+        )
+        db.session.add(user)
     else:
-        app.credentials = hash_password(cred)
-        app.redirect = url
+        app_object.credentials = hash_password(cred)
+        app_object.redirect = url
+        app_object.name = name
         status, code = 'updated', 200
+
     db.session.commit()
-    users[application] = {"password": hash_password(cred), "role": "funcbeh"}
 
     accept = request.headers.get('Accept', 'text/html')
 
     if accept == 'application/json':
-        return make_response(jsonify({
+        body = {
             'status': status,
-            'message': 'Application added',
+            'message': f'Application {status}',
             'application': application
-        }), code)
+        }
+        if status == 'created':
+            invite = Invitation(
+                uuid=get_invite(),
+                application=app_object,
+                role='operator',
+            )
+            db.session.add(invite)
+            db.session.commit()
+            frontend_base = app.config['FRONTEND_HOST']
+            body['invitation'] = f"{frontend_base}/invitations/{invite.uuid}"
+        return make_response(jsonify(body), code)
     return make_response(render_template('succes.html', result=application), code)
 
 
-@bp.route('/find/<app>', methods=['GET'])
-@auth.login_required(role='sysop')
-def get_app(app):
-    logging.debug(f'get app[{app}]')
+@bp.route('/apps/<appl>', methods=['GET'])
+@login_required
+@permission(is_sysop)
+def get_app(appl):
+    logging.debug(f'get app[{appl}]')
     # result = cur.execute("SELECT _id FROM application WHERE mnemonic = %s", [app])
-    application = db.session.query(Application).filter_by(mnemonic=app).first_or_404()
+    application = db.session.query(Application).filter_by(mnemonic=appl).first_or_404()
     response = make_response(render_template('get.html', application=application), 200)
     return response
 
 
-@bp.route('/<app>/func', methods=['POST'])
-@auth.login_required(role='sysop')
-def add_func_eppn(app: str):
+@bp.route('/apps/<appl>/func', methods=['POST'])
+@login_required
+@permission(is_sysop)
+def add_func_eppn(appl: str):
     """
     Create a functional admin for the application
 
     Expects a JSON body with an 'eppn' key
-    :param app: The name of the application
+    :param appl: The name of the application
     :return:
     """
     body = request.get_json()
     eppn: str = body['eppn']
-    logging.debug(f'add functioneel beheerder eppn[{eppn}] to app[{app}]')
+    logging.debug(f'add functioneel beheerder eppn[{eppn}] to app[{appl}]')
 
-    application = db.session.query(Application).filter_by(mnemonic=app).first_or_404()
+    application = db.session.query(Application).filter_by(mnemonic=appl).first_or_404()
     user = db.session.query(User).filter_by(username=eppn).first()
 
     if user is None:
         user = User(username=eppn, user_info={})
         db.session.add(user)
 
-    application.functional_admin = user
+    application.user_associations.append(ApplicationUserAssociation(
+        user=user,
+        role='operator',
+    ))
     db.session.commit()
 
     accept = request.headers.get('Accept', 'text/html')
@@ -88,8 +125,8 @@ def add_func_eppn(app: str):
         return make_response(jsonify({
             'status': 'ok',
             'message': 'Functional admin added',
-            'application': app,
-            'functional_admin': user.username,
+            'application': appl,
+            'operator': user.username,
         }), 200)
-    response = make_response(render_template('new_func.html', app=app, func=eppn), 200)
+    response = make_response(render_template('new_func.html', app=appl, func=eppn), 200)
     return response

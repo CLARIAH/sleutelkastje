@@ -7,6 +7,7 @@ class Config:
     """
     Application configuration
     """
+    FRONTEND_HOST = os.environ.get('FRONTEND_HOST', '')
     DATABASE_HOST = os.environ.get('DATABASE_HOST', 'localhost')
     DATABASE_PORT = os.environ.get('DATABASE_PORT', 5432)
     DATABASE_DB = os.environ.get('DATABASE_DB', 'sleutelkastje')

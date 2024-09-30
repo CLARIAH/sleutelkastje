@@ -5,7 +5,6 @@ import nl.knaw.huc.di.openidconnect.LoginEndPoint;
 import nl.knaw.huc.di.openidconnect.OpenIdClient;
 import nl.knaw.huc.di.openidconnect.OpenIdConnectException;
 import nl.knaw.huc.di.sleutelkast.SleutelkastClient;
-import nl.knaw.huc.di.sleutelkast.exceptions.UnauthorizedException;
 import nl.knaw.huc.di.todo.controllers.TodoController;
 import nl.knaw.huc.di.todo.middleware.Authentication;
 import org.slf4j.Logger;
