@@ -1,8 +1,3 @@
-# version is now using "compose spec"
-# v2 and v3 are now combined!
-# docker-compose v1.27+ require
-version: '2'
-
 services:
   sleutelkastje:
     environment:
@@ -62,6 +57,7 @@ services:
       OIDC_CLIENT_SECRET: "5RKBN2siBqLq9MUHXlKZ" 
 #    image: registry.diginfra.net/tsd/sleutelkastje-todo-j:20240416
     build: ./todo/java
+    restart: unless-stopped
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sleutelkast-todo-j.entrypoints=http"
@@ -80,6 +76,7 @@ services:
       POSTGRES_USER: "test"
       POSTGRES_PASSWORD: "test"
       POSTGRES_DB: "sleutelkastje"
+    restart: unless-stopped
     ports:
       - "5454:5432"
     volumes:

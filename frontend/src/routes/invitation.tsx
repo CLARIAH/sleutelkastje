@@ -1,13 +1,15 @@
 import {FullpageFormContainer} from "../components/FullpageFormContainer.tsx";
-import {Button, Stack, Typography} from "@mui/material";
+import {Button, List, ListItem, ListItemText, Stack, Typography} from "@mui/material";
 import axios from "axios";
 import {useLoaderData, useNavigate} from "react-router-dom";
+import {ReactElement} from "react";
 
 interface IInvitationDetails {
     appName: string
     appId: string
     role: string
     code: string
+    itemRoles: Map<string, string>
 }
 
 interface IInvitationLoaderData {
@@ -42,6 +44,24 @@ export function Invitation() {
         })
     }
 
+    function renderItemRoles() {
+        if (invitation.itemRoles.size === 0) {
+            return;
+        }
+        let tmp: ReactElement[] = [];
+        for (let [item, role] of Object.entries(invitation.itemRoles)) {
+            tmp.push(<ListItem key={item}>
+                <ListItemText primary={item} secondary={role} />
+            </ListItem>)
+        }
+        return <>
+            <Typography component={"h3"} variant={"h6"}>You are invited to use these items:</Typography>
+            <List>
+                {tmp}
+            </List>
+        </>
+    }
+
     return <FullpageFormContainer>
         <Typography
             component="h1"
@@ -57,6 +77,7 @@ export function Invitation() {
             You are invited to join application {invitation.appName}.
         </Typography>
         <Typography>Your role will be <strong>{invitation.role}</strong></Typography>
+        {renderItemRoles()}
         <Stack sx={{mt: 4}} direction="row" spacing={2}>
             <Button
                 fullWidth

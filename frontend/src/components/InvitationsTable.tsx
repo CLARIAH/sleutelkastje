@@ -19,7 +19,7 @@ import {
     Typography
 } from "@mui/material";
 import {DataGrid, GridColDef, GridRowSelectionModel, GridToolbarContainer} from '@mui/x-data-grid';
-import {useState} from "react";
+import {FormEvent, useState} from "react";
 import axios from "axios";
 import {useRevalidator} from "react-router-dom";
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -55,6 +55,7 @@ export function InvitationsTable({app, invitations, items}: {app: IApp, invitati
     const [role, setRole] = useState('')
     const [activeTab, setActiveTab] = useState(0)
     const revalidator = useRevalidator()
+    const [selectedItems, setSelectedItems] = useState<IItem[]>([])
 
     const [rowSelection, setRowSelection] = useState<GridRowSelectionModel>([])
 
@@ -64,10 +65,22 @@ export function InvitationsTable({app, invitations, items}: {app: IApp, invitati
         setRole('')
     }
 
-    function createInvitation(e: { preventDefault: () => void; }) {
+    function createInvitation(e: FormEvent) {
         e.preventDefault()
 
-        axios.post('/api/apps/' + app.mnemonic + '/invitations', {role: role}).then(response => {
+        let itemRoles: Record<string, string> = {}
+
+        selectedItems.forEach((item) => {
+            // @ts-ignore
+            itemRoles[item.name] = e.target[item.name + '-role'].value
+        })
+
+        console.log("Item Roles", itemRoles)
+
+        axios.post('/api/apps/' + app.mnemonic + '/invitations', {
+            role: role,
+            itemRoles: itemRoles,
+        }).then(response => {
             console.log(response)
             setInviteCode(response.data.inviteId)
             setActiveTab(1)
@@ -98,7 +111,7 @@ export function InvitationsTable({app, invitations, items}: {app: IApp, invitati
     function renderModalContent() {
         switch (activeTab) {
             case 0:
-                return <Box component={"form"} onSubmit={createInvitation} noValidate>
+                return <Box component={"form"} onSubmit={createInvitation}>
                     <DialogContent>
                         <DialogContentText>
                             Create an invitation
@@ -109,14 +122,26 @@ export function InvitationsTable({app, invitations, items}: {app: IApp, invitati
                             width: '100%',
                             gap: 2
                         }}>
-                            <TextField id={"invitationRole"} value={role} onChange={e => setRole(e.target.value)} label={"Role"} variant={"standard"} />
+                            <TextField required name={"invitationRole"} id={"invitationRole"} value={role} onChange={e => setRole(e.target.value)} label={"Role"} variant={"standard"} />
                             <Autocomplete
                                 multiple
                                 options={items}
+                                getOptionLabel={(option) => option.name}
                                 renderInput={(params) => (
-                                    <TextField {...params} variant={'standard'} />
+                                    <TextField {...params} label={'Items'} variant={'standard'} />
                                 )}
+                                value={selectedItems}
+                                onChange={(_e, newValue) => {setSelectedItems(newValue)}}
                                 />
+                            {selectedItems.map((item) => (
+                                <TextField
+                                    key={item.name}
+                                    id={item.name + '-role'}
+                                    name={item.name + '-role'}
+                                    label={"Role for " + item.name}
+                                    variant={'standard'}
+                                    required />
+                            ))}
                         </Box>
                     </DialogContent>
                     <DialogActions>

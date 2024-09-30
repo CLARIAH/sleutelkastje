@@ -2,10 +2,11 @@ import logging
 
 from flask import jsonify, make_response, request
 from flask_login import current_user, login_required
+from gunicorn.http import body
 
 from sleutelkastje.application import db
 from sleutelkastje.authentication import auth, get_user_by_key, permission
-from sleutelkastje.management import Invitation, Item, bp, get_invite, is_func, key_valid
+from sleutelkastje.management import Invitation, Item, UserItemAssociation, bp, get_invite, is_func, key_valid
 from sleutelkastje.sysop import Application, ApplicationUserAssociation
 
 
@@ -123,20 +124,29 @@ def invite(app):
     :return:
     """
     body = request.get_json()
+    application = db.session.query(Application).filter_by(mnemonic=app).first_or_404()
 
     if 'role' not in body:
         return jsonify({'success': False, 'error': 'No role provided'}), 400
+
+    item_roles = {}
+    if 'itemRoles' in body:
+        item_roles = body['itemRoles']
+        item_names = [item.name for item in application.items]
+        for item, role in item_roles.items():
+            if item not in item_names:
+                return jsonify({'success': False, 'error': f'Item {item.name} not found'}), 400
 
     role = body['role']
 
     uuid = get_invite()
     logging.debug(f'app[{app}] invite[{uuid}]')
-    application = db.session.query(Application).filter_by(mnemonic=app).first()
 
     invitation = Invitation(
         uuid=uuid,
         application=application,
-        role=role
+        role=role,
+        item_role_configuration=item_roles,
     )
 
     db.session.add(invitation)
@@ -162,12 +172,7 @@ def get_invitations(invitation_id: str):
             "error": "Invitation used"
         }), 200
 
-    return jsonify({
-        "code": invitation_id,
-        "appName": invitation.application.name,
-        "appId": invitation.application.mnemonic,
-        "role": invitation.role
-    })
+    return jsonify(invitation.to_dict()), 200
 
 
 @bp.route('/invitations/<invitation_id>', methods=['POST'])
@@ -191,17 +196,17 @@ def register(invitation_id: str):
 
     if action == 'accept':
         invitation.user = current_user
-        invitation.application.user_associations.append(ApplicationUserAssociation(
-            user=current_user,
-            role=invitation.role
-        ))
+        invitation.application.add_user(current_user, invitation.role)
+
+        for item, role in invitation.item_role_configuration.items():
+            item = db.session.query(Item).filter_by(name=item, app_id=invitation.application.id).first()
+            if item is None:
+                continue
+            item.add_user(current_user, role)
 
         db.session.commit()
 
-        eppn = current_user.username
-        application = invitation.application
         # check result
-        appl = application.mnemonic
         return jsonify({
             "success": True,
         }), 200

@@ -55,6 +55,14 @@ class User(db.Model):
             'nickname': self.nickname,
         }
 
+    def __eq__(self, other):
+        """
+        Compare if two users are equal.
+        :param other:
+        :return:
+        """
+        return self.get_id() == other.get_id()
+
 
 class Key(db.Model):
     """
