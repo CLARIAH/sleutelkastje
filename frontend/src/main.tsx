@@ -7,7 +7,6 @@ import {Root, loader as rootLoader} from "./routes/root.tsx";
 import {Index} from "./routes";
 import axios from "axios";
 import Login from "./routes/authentication/login.tsx";
-import {backendBase} from "./config.ts";
 import {CompleteProfile, completeProfileLoader} from "./routes/authentication/completeProfile.tsx";
 import {ApplicationDetails, applicationLoader} from "./routes/appManagement/applicationDetails.tsx";
 import '@fontsource/roboto/300.css';
@@ -19,9 +18,10 @@ import {ApplicationInvitations, invitationsLoader} from "./routes/appManagement/
 import {ApplicationItems, itemsLoader} from "./routes/appManagement/applicationItems.tsx";
 import {Invitation, invitationLoader} from "./routes/invitation.tsx";
 import {ApiKeys, apiKeysLoader} from "./routes/user/apiKeys.tsx";
+import {getBackendBase} from "./config.ts";
 
 
-axios.defaults.baseURL = backendBase
+axios.defaults.baseURL = getBackendBase()
 axios.defaults.withCredentials = true
 
 const router = createBrowserRouter([

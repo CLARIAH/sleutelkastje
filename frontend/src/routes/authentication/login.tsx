@@ -1,7 +1,6 @@
 import {useState} from "react";
 import axios from "axios";
 import {useLocation, useNavigate} from "react-router-dom";
-import {backendBase} from "../../config.ts";
 import {FullpageFormContainer} from "../../components/FullpageFormContainer.tsx";
 import {
     Button,
@@ -12,6 +11,7 @@ import {
     TextField,
     Divider
 } from "@mui/material";
+import {getBackendBase} from "../../config.ts";
 
 export default function Login() {
 
@@ -44,7 +44,7 @@ export default function Login() {
     }
 
     function satosaRedirect() {
-        window.location.href = backendBase + '/oidc/login?next=' + encodeURIComponent(redirectTarget)
+        window.location.href = getBackendBase() + '/oidc/login?next=' + encodeURIComponent(redirectTarget)
     }
 
     return <FullpageFormContainer>
