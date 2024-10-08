@@ -16,7 +16,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sleutelkast.entrypoints=http"
-      - "traefik.http.routers.sleutelkast.rule=Host(`sleutelkast.sd.di.huc.knaw.nl`);PathRegexp(`(?i)^/(api|auth)`)"
+      - "traefik.http.routers.sleutelkast.rule=(Host(`sleutelkast.sd.di.huc.knaw.nl`) && PathRegexp(`(?i)^/(api|auth)`))"
     image: registry.diginfra.net/tsd/sleutelkastje:latest
     ports:
       - "3010:5000"
@@ -46,7 +46,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sk-docs.entrypoints=http"
-      - "traefik.http.routers.sk-docs.rule=Host(`sleutelkast.sd.di.huc.knaw.nl`);PathPrefix(`/docs`)"
+      - "traefik.http.routers.sk-docs.rule=(Host(`sleutelkast.sd.di.huc.knaw.nl`) && PathPrefix(`/docs`))"
       - "traefik.http.middlewares.sk-docs.stripprefix.prefixes=/docs"
     networks:
       - sleutelkast_network
