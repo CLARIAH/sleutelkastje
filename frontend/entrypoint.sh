@@ -5,7 +5,7 @@ for file in /usr/share/nginx/html/assets/*.js; do
     cp $file $file.tmpl.js
   fi
 
-  envsubst '$REACT_APP_API_BASE' <$file.tmpl.js >$file
+  envsubst '$VITE_API_BASE' <$file.tmpl.js >$file
 done
 
 nginx -g 'daemon off;'
