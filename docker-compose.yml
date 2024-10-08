@@ -47,7 +47,8 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.sk-docs.entrypoints=http"
       - "traefik.http.routers.sk-docs.rule=(Host(`sleutelkast.sd.di.huc.knaw.nl`) && PathPrefix(`/docs`))"
-      - "traefik.http.middlewares.sk-docs.stripprefix.prefixes=/docs"
+      - "traefik.http.middlewares.sk-docs-stripprefix.stripprefix.prefixes=/docs"
+      - "traefik.http.routers.sk-docs.middlewares=sk-docs-stripprefix"
     networks:
       - sleutelkast_network
 
