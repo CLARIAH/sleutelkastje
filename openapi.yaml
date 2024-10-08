@@ -1,0 +1,369 @@
+openapi: 3.0.3
+info:
+  title: Sleutelkastje
+  description: Sleutelkastje
+  version: $VERSION_NUMBER
+servers:
+  - url: 'https://localhost:3010/api'
+tags:
+  - name: Applications
+    description: Manage and view applications registered with the Sleutelkastje application
+  - name: Invitations
+    description: Invitations for allowing users to gain access to an application
+  - name: Items
+    description: Items are subsets of an application. This allows for more fine-grained access control in applications. Users can have permissions set on a per-item level, not just for the entire application.
+  - name: User validation
+    description: These endpoints can be used to validate users. This can either include sending an API key in order to get the user information and items/roles for the application, or just getting the permissions and roles for a known username of the application.
+paths:
+  /apps/list:
+    get:
+      summary: List applications
+      description: Get a list of all the application the currently authenticated user can see.
+      tags:
+        - Applications
+      security:
+        - ApiKey: []
+      responses:
+        200:
+          description: A list of all the applications the user can see
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Application'
+  /apps/{appId}/details:
+    get:
+      summary: Get application
+      description: Get the details of a specific application
+      tags:
+        - Applications
+      security:
+        - ApiKey: []
+      parameters:
+        - name: appId
+          description: The identifier of the application
+          in: path
+          schema:
+            type: string
+      responses:
+        200:
+          description: The details of a specific application
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+
+  /apps/{appId}/items:
+    parameters:
+      - name: appId
+        description: The identifier of the application
+        in: path
+        schema:
+          type: string
+    get:
+      description: Get all items of this application
+      tags:
+        - Items
+      security:
+        - ApiKey: []
+      responses:
+        200:
+          description: A list of items
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Item'
+    post:
+      description: Create a new item for this application
+      tags:
+        - Items
+      security:
+        - ApiKey: []
+      requestBody:
+        description: Item details
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "data-story-1"
+
+      responses:
+        201:
+          description: The created item
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    default: "Item created"
+                  item:
+                    $ref: '#/components/schemas/Item'
+
+  /apps/{appId}/validate:
+    parameters:
+      - name: appId
+        description: The identifier of the application
+        in: path
+        schema:
+          type: string
+    post:
+      description: Validate an API key and get user information
+      tags:
+        - User validation
+      security:
+        - ApiKey: []
+      requestBody:
+        description: User information
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+      responses:
+        200:
+          description: Key valid for this application, user info retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    default: success
+                  userData:
+                    $ref: '#/components/schemas/UserMinimal'
+                  items:
+                    $ref: '#/components/schemas/ItemRoles'
+
+
+  /apps/{appId}/invitations:
+    parameters:
+      - name: appId
+        description: The identifier of the application
+        in: path
+        schema:
+          type: string
+    get:
+      description: Get the invitations for an application
+      tags:
+        - Invitations
+      security:
+        - ApiKey: []
+      responses:
+        200:
+          description: A list of invitations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  invites:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Invitation'
+
+    post:
+      description: Create a new invitation for an application
+      tags:
+        - Invitations
+      security:
+        - ApiKey: []
+      requestBody:
+        description: Invitation details
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role:
+                  type: string
+                  pattern: '^[0-9a-f\-]+'
+                  example: 'user'
+                itemRoles:
+                  $ref: '#/components/schemas/ItemRoles'
+      responses:
+        201:
+          description: The newly created invitation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invitation'
+    delete:
+      description: Delete invitations for an application
+      security:
+        - ApiKey: []
+      tags:
+        - Invitations
+      requestBody:
+        description:
+          Invitations to delete
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        200:
+          description: Invitations deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+        400:
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: false
+                  error:
+                    type: string
+                    example: "No IDs provided"
+  /invitations/{invitationId}:
+    get:
+      security:
+        - ApiKey: []
+      tags:
+        - Invitations
+      description: Get details of a specific invitation
+      responses:
+        200:
+          description: Invitation details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invitation'
+    post:
+      security:
+        - ApiKey: []
+      tags:
+        - Invitations
+      description: Accept or reject an invitation
+      responses:
+        200:
+          description: Success
+
+components:
+  securitySchemes:
+    ApiKey:
+      type: apiKey
+      in: header
+      name: Authorization
+  schemas:
+    Application:
+      type: object
+      properties:
+        mnemonic:
+          type: string
+          pattern: '^[0-9a-f\-]+'
+          example: 'todo-list'
+        name:
+          type: string
+          example: "To Do List"
+        currentRole:
+          type: string
+          pattern: '^[0-9a-f\-]+'
+          example: "user"
+    Invitation:
+      type: object
+      properties:
+        id:
+          type: integer
+        user:
+          description: The user who has accepted the invitation, if any. `Null` otherwise.
+          nullable: true
+          $ref: '#/components/schemas/User'
+        role:
+          description: The role the user has on the application level
+          type: string
+          pattern: '^[0-9a-f\-]+'
+          example: 'user'
+        appId:
+          description: The unique mnemonic of the application
+          type: string
+          pattern: '^[0-9a-f\-]+'
+          example: 'todo-list'
+        appName:
+          description: The readable name of the application
+          type: string
+          example: "ToDo List"
+        itemRoles:
+          $ref: '#/components/schemas/ItemRoles'
+        code:
+          description: The unique key of this invitation
+          type: string
+    ItemRoles:
+      description: An object containing the role for every item to which you wish to give the user access. Keys must match the `name` of an existing item belonging to this application. The values are the 'role' the user has for that item. They do not have meaning within the Sleutelkastje, so what they need to be depends on the app using these items itself.
+      type: object
+      additionalProperties:
+        x-additionalPropertiesName: item-name
+        type: string
+        pattern: '^[0-9a-f\-]+'
+      example:
+        'data-story-1': user
+        'data-story-2': owner
+    Item:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          pattern: '^[0-9a-f\-]+'
+          example: 'data-story-1'
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+          example: 'some.user@example.com'
+        nickname:
+          type: string
+          example: John Doe
+        role:
+          type: string
+          example: user
+          pattern: '^[0-9a-f\-]+'
+        profileComplete:
+          type: boolean
+        isOidc:
+          type: boolean
+    UserMinimal:
+      type: object
+      properties:
+        username:
+          type: string
+          example: 'some.user@example.com'
+        nickname:
+          type: string
+          example: John Doe
+        role:
+          type: string
+          example: user
+          pattern: '^[0-9a-f\-]+'

@@ -13,7 +13,7 @@ import {
 import {FullpageFormContainer} from "../../components/FullpageFormContainer.tsx";
 
 export async function completeProfileLoader() {
-    const authResponse = await axios.get('/me')
+    const authResponse = await axios.get('/api/auth/me')
 
     const user: IUserData = authResponse.data
 
@@ -34,7 +34,7 @@ export function CompleteProfile() {
         e.preventDefault()
         setLoading(true)
 
-        axios.post("/complete-profile", {
+        axios.post("/api/auth/complete-profile", {
             nickname: nickname
         }).then(e => {
             console.log(e)
@@ -47,7 +47,7 @@ export function CompleteProfile() {
     }
 
     function logout() {
-        axios.post("/logout").then(() => {
+        axios.post("/api/auth/logout").then(() => {
             navigate('/login')
         }).catch(e => {
             console.warn(e)

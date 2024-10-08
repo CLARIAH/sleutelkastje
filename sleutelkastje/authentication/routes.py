@@ -9,7 +9,7 @@ from sleutelkastje.authentication.authentication import get_api_key, hash_passwo
 from sleutelkastje.authentication.models import Key
 
 
-@bp.route('/me', methods=['GET'])
+@bp.route('/api/auth/me', methods=['GET'])
 @login_required
 def me():
     """
@@ -25,7 +25,7 @@ def me():
     })
 
 
-@bp.route('/login', methods=['POST'])
+@bp.route('/api/auth/login', methods=['POST'])
 def login():
     """
     Log in the user
@@ -53,7 +53,7 @@ def login():
     }), 200
 
 
-@bp.route('/logout', methods=['POST'])
+@bp.route('/api/auth/logout', methods=['POST'])
 @login_required
 def logout():
     """
@@ -66,7 +66,7 @@ def logout():
     }), 200
 
 
-@bp.route('/complete-profile', methods=['POST'])
+@bp.route('/api/auth/complete-profile', methods=['POST'])
 @login_required
 def complete_profile():
     """

@@ -29,7 +29,7 @@ export default function Login() {
         e.preventDefault()
         setLoading(true)
 
-        axios.post("/login", {
+        axios.post("/api/auth/login", {
             username: username,
             password: password
         }).then(e => {

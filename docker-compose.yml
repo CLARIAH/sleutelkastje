@@ -17,7 +17,8 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.sleutelkast.entrypoints=http"
       - "traefik.http.routers.sleutelkast.rule=Host(`sleutelkast.sd.di.huc.knaw.nl`)"
-#    build: .
+      - "traefik.http.routers.sleutelkast.rule=PathPrefix(`/api`)"
+      - "traefik.http.routers.sleutelkast.rule=PathPrefix(`/oidc`)"
     image: registry.diginfra.net/tsd/sleutelkastje:latest
     ports:
       - "3010:5000"
@@ -25,6 +26,21 @@ services:
       - db
     networks:
       - sleutelkast_network
+  frontend:
+    build: frontend
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sleutelkast.entrypoints=http"
+      - "traefik.http.routers.sleutelkast.rule=Host(`sleutelkast.sd.di.huc.knaw.nl`)"
+  docs:
+    build:
+      context: .
+      dockerfile: Dockerfile-docs
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sleutelkast.entrypoints=http"
+      - "traefik.http.routers.sleutelkast.rule=Host(`docs.sleutelkast.sd.di.huc.knaw.nl`)"
 
   todo:
     environment:

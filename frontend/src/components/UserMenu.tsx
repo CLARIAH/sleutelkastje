@@ -31,7 +31,7 @@ export function UserMenu() {
     }
 
     function logout() {
-        axios.post("/logout").then(() => {
+        axios.post("/api/auth/logout").then(() => {
             navigate('/login')
         }).catch(e => {
             console.warn(e)

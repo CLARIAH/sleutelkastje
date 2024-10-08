@@ -70,7 +70,7 @@ export async function loader() {
 
 
     let authFailed = false
-    const authResponse = await axios.get('/me').catch(() => {
+    const authResponse = await axios.get('/api/auth/me').catch(() => {
         authFailed = true
     })
 
