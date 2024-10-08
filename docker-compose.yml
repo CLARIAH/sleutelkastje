@@ -28,7 +28,7 @@ services:
     build: frontend
     restart: unless-stopped
     ports:
-      - "80:5002"
+      - "3020:80"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sk-frontend.entrypoints=http"
@@ -38,7 +38,7 @@ services:
       context: .
       dockerfile: Dockerfile-docs
     ports:
-      - "80:5003"
+      - "3021:80"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sk-docs.entrypoints=http"
