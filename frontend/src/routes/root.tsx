@@ -134,7 +134,7 @@ export function Root() {
 
     const [selectedApp, setSelectedApp] = useState(apps[0])
 
-    if (selectedApp.current_role == 'operator') {
+    if (selectedApp && selectedApp.current_role == 'operator') {
         appRoutes.push({
             icon: <SendRounded />,
             name: "Invitations",
