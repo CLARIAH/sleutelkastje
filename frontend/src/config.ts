@@ -1,1 +1,1 @@
-export const backendBase = import.meta.env.VITE_API_BASE
+export const backendBase = '$REACT_APP_API_BASE'
