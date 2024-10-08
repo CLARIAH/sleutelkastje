@@ -16,7 +16,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sleutelkast.entrypoints=http"
-      - "traefik.http.routers.sleutelkast.rule=(Host(`sleutelkast.sd.di.huc.knaw.nl`) && (PathPrefix(`/api`) || PathPrefix(`/oidc`))"
+      - "traefik.http.routers.sleutelkast.rule=(Host(`sleutelkast.sd.di.huc.knaw.nl`) && (PathPrefix(`/api`) || PathPrefix(`/oidc`) || PathPrefix(`/test`)))"
     image: registry.diginfra.net/tsd/sleutelkastje:latest
     ports:
       - "3010:5000"
