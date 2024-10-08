@@ -33,6 +33,8 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.sk-frontend.entrypoints=http"
       - "traefik.http.routers.sk-frontend.rule=Host(`sleutelkast.sd.di.huc.knaw.nl`)"
+    networks:
+      - sleutelkast_network
   sk-docs:
     build:
       context: .
@@ -44,6 +46,8 @@ services:
       - "traefik.http.routers.sk-docs.entrypoints=http"
       - "traefik.http.routers.sk-docs.rule=Host(`sleutelkast.sd.di.huc.knaw.nl`);PathPrefix(`/docs`)"
       - "traefik.http.middlewares.sk-docs.stripprefix.prefixes=/docs"
+    networks:
+      - sleutelkast_network
 
   todo:
     environment:
