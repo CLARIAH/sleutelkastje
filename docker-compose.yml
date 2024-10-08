@@ -29,6 +29,8 @@ services:
     restart: unless-stopped
     ports:
       - "3020:80"
+    environment:
+      REACT_APP_API_BASE: "https://sleutelkast.sd.di.huc.knaw.nl"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sk-frontend.entrypoints=http"
