@@ -1,6 +1,6 @@
 #!/bin/sh
 
-for file in /usr/share/nginx/html/dist/assets/*.js; do
+for file in /usr/share/nginx/html/assets/*.js; do
   if [ ! -f $file.tmpl.js ]; then
     cp $file $file.tmpl.js
   fi

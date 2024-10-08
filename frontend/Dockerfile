@@ -12,7 +12,7 @@ RUN npm run build
 # release step
 FROM nginx:1.21.5-alpine as release
 
-COPY --from=build /app/dist /usr/share/nginx/html/
+COPY --from=build /app/dist /usr/share/nginx/html
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 EXPOSE 80
