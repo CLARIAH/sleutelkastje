@@ -14,6 +14,7 @@ FROM nginx:1.21.5-alpine as release
 
 COPY --from=build /app/dist /usr/share/nginx/html/
 COPY entrypoint.sh /
+RUN chmod +x /entrypoint.sh
 EXPOSE 80
 
-CMD ["entrypoint.sh"]
+CMD ["/entrypoint.sh"]
