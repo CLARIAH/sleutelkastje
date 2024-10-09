@@ -1,9 +1,12 @@
 FROM python:3.9-slim
 
-ADD scripts ./
+ADD sleutelkastje ./sleutelkastje
+ADD entrypoint.sh ./
+ADD migrations ./migrations
+ADD seeds ./seeds
 
-RUN pip install -r requirements.txt
+RUN pip install -r sleutelkastje/requirements.txt
 
-CMD ["gunicorn", "-b", ":5000", "-t", "60", "-w", "1", "--threads", "4", "app:app"]
+ENTRYPOINT ["./entrypoint.sh"]
 
 EXPOSE 5000

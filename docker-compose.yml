@@ -13,15 +13,43 @@ services:
       OIDC_SERVER: "https://testauthentication.di.huc.knaw.nl"
       OIDC_CLIENT_ID: "nl_knaw_huc_di_sd_sleutelkast" 
       OIDC_CLIENT_SECRET: "b47e55ae-4634-11ed-a804-5329bcd6a806"
+      FRONTEND_HOST: "https://sleutelkast.sd.di.huc.knaw.nl"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sleutelkast.entrypoints=http"
-      - "traefik.http.routers.sleutelkast.rule=Host(`sleutelkast.sd.di.huc.knaw.nl`)"
-    build: .
+      - "traefik.http.routers.sleutelkast.rule=(Host(`sleutelkast.sd.di.huc.knaw.nl`) && (PathPrefix(`/api`) || PathPrefix(`/oidc`) || PathPrefix(`/test`)))"
+    image: registry.diginfra.net/tsd/sleutelkastje:latest
     ports:
       - "3010:5000"
     depends_on:
       - db
+    networks:
+      - sleutelkast_network
+  sk-frontend:
+    build: frontend
+    restart: unless-stopped
+    ports:
+      - "3020:80"
+    environment:
+      VITE_API_BASE: "https://sleutelkast.sd.di.huc.knaw.nl"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sk-frontend.entrypoints=http"
+      - "traefik.http.routers.sk-frontend.rule=Host(`sleutelkast.sd.di.huc.knaw.nl`)"
+    networks:
+      - sleutelkast_network
+  sk-docs:
+    build:
+      context: .
+      dockerfile: Dockerfile-docs
+    ports:
+      - "3021:80"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sk-docs.entrypoints=http"
+      - "traefik.http.routers.sk-docs.rule=(Host(`sleutelkast.sd.di.huc.knaw.nl`) && PathPrefix(`/docs`))"
+      - "traefik.http.middlewares.sk-docs-stripprefix.stripprefix.prefixes=/docs"
+      - "traefik.http.routers.sk-docs.middlewares=sk-docs-stripprefix"
     networks:
       - sleutelkast_network
 

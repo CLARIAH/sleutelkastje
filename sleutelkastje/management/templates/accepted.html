@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Invitation accepted{% endblock %}
+
+{% block content %}
+    <div class="row justify-content-around">
+        <div class="col-12 col-md-8 col-lg-7 col-xl-6">
+            <div class="card mt-5">
+                <div class="card-body">
+                    <h5 class="card-title">Invitation Accepted</h5>
+                    <h6 class="card-subtitle mb-2 text-body-secondary">API Key generated</h6>
+                    <p>
+                        Hello <strong>{{ person }}</strong>, you have successfully accepted your invitation
+                        to use the app <strong>{{ app }}</strong>. An API key has been generated for you,
+                        you can copy it from below.
+                    </p>
+                    <label for="api-key" class="form-label">API Key</label>
+                    <div class="input-group">
+                        <input type="text" disabled="disabled" id="api-key" class="form-control" value="{{ key }}" />
+                        <button onclick="copyToClipboard()" class="btn btn-outline-primary" type="button" aria-describedby="api-key-info">Copy</button>
+                    </div>
+                    <div class="form-text" id="api-key-info">Please save your API key somewhere. This is the only time you can see it.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="success-toast" class="toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    API Key copied!
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block scripts %}
+    <script>
+
+        const successToast = document.getElementById('success-toast');
+
+        const copyToClipboard = async () => {
+            try {
+                const element = document.querySelector("#api-key");
+                await navigator.clipboard.writeText(element.value);
+
+                const toastBootstrap = bootstrap.Toast.getOrCreateInstance(successToast);
+                toastBootstrap.show();
+            } catch (error) {
+                console.error("Failed to copy to clipboard:", error)
+            }
+        }
+    </script>
+{% endblock %}
