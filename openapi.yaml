@@ -12,6 +12,10 @@ tags:
     description: Invitations for allowing users to gain access to an application
   - name: Items
     description: Items are subsets of an application. This allows for more fine-grained access control in applications. Users can have permissions set on a per-item level, not just for the entire application.
+  - name: User data
+    description: Information about the current user
+  - name: API Keys
+    description: Create and get API keys for authentication to the apps in the Sleutelkastje
   - name: User validation
     description: These endpoints can be used to validate users. This can either include sending an API key in order to get the user information and items/roles for the application, or just getting the permissions and roles for a known username of the application.
 paths:
@@ -53,6 +57,29 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Application'
+
+  /admin/apps/{appId}:
+    parameters:
+      - name: appId
+        description: The identifier of the application
+        in: path
+        schema:
+          type: string
+    get:
+      deprecated: true
+      description: (Admin) Get app details
+      responses:
+        200:
+          description: Application details
+    put:
+      summary: (Admin) Create or update application
+      description: Create a new application or update an existing one
+      requestBody:
+        description: Application details
+        content:
+          application/json:
+            schema:
+
 
   /apps/{appId}/items:
     parameters:
@@ -266,9 +293,107 @@ paths:
       tags:
         - Invitations
       description: Accept or reject an invitation
+      requestBody:
+        description: Action to perform
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
       responses:
         200:
           description: Success
+
+  /api/auth/me:
+    get:
+      security:
+        - ApiKey: []
+      tags:
+        - User data
+      summary: Get user info
+      description: Get the details of the current user
+      responses:
+        200:
+          description: User info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /api/auth/complete-profile:
+    post:
+      security:
+        - ApiKey: []
+      tags:
+        - User data
+      summary: Complete profile
+      description: Complete the profile of the current user
+      requestBody:
+        description: User data
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nickname:
+                  description: Nickname to set for the user
+                  type: string
+                  example: John Doe
+      responses:
+        200:
+          description: Success
+
+  /api/keys:
+    get:
+      security:
+        - ApiKey: []
+      tags:
+        - API Keys
+      summary: Get API Keys
+      description: Get all API keys of the current user
+      responses:
+        200:
+          description: API Keys
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  keys:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/APIKey'
+    post:
+      security:
+        - ApiKey: []
+      tags:
+        - API Keys
+      summary: Create API key
+      description: Create a new API key. Note that the response of this request is the only time you can see the raw value of the key.
+      requestBody:
+        description: API Key details
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  description: Name by which to identify this key
+                  type: string
+      responses:
+        201:
+          description: Success and API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  key:
+                    type: string
 
 components:
   securitySchemes:
@@ -337,6 +462,14 @@ components:
         name:
           pattern: '^[0-9a-f\-]+'
           example: 'data-story-1'
+    APIKey:
+      type: object
+      properties:
+        name:
+          type: string
+        readable_part:
+          type: string
+          pattern: '^huc:.{16}'
     User:
       type: object
       properties:
