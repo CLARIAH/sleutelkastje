@@ -1,36 +1,7 @@
 # Sleutelkastje
-This is a proof-of-concept for transparently handling API keys, delegation tokens and general Satosa logins.
+This is a proof-of-concept for a centralised API key authentication system to be used for several HuC APIs. This will help making it easier to have role-based permissions and authentication in small applications where building its own authentication system would not be practical.
 
-## Usage
-Below are a number of API endpoints used for registering applications and their users with the
-sleutelkastje.
+Sleutelkastje allows application owners ("operators") to add "items" to their applications, for a more granular access to the application itself. Users can then be invited to an application with specific roles per item. Authentication to the Sleutelkastje itself (for accepting invitations and managing API keys) supports OIDC.
 
-### Adding an app
-
-> PUT `{sleutelkastje_hostname}/{app_name}`
-
-This request should contain a JSON body:
-
-```json
-{
-  "credentials": "some-secret-key",
-  "redirect": "test"
-}
-```
-
-### Setting the functional admin for an app
-
-> POST `{sleutelkastje_hostname}/{app_name}/func`
-
-This request should contain a JSON body:
-```json
-{
-  "eppn": "eppn-of-the-user"
-}
-```
-
-### Inviting a user
-
-In the browser, go to the following URL:
-
-> `{sleutelkastje_hostname}/invite/{app_name}`
+## Documentation
+The API for interacting with the Sleutelkastje has been documented in the [OpenAPI specification](openapi.yaml), and will be hosted inside the HuC network as well (not publicly accessible).
