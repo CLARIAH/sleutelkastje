@@ -268,7 +268,7 @@ def check_userinfo(appl: str):
 
     return jsonify({
         'status': 'unauthorized',
-        'message': 'submitted API key is not known',
+        'message': 'submitted username is not known',
     }), 200
 
 

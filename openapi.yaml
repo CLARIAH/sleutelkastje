@@ -67,6 +67,10 @@ paths:
           type: string
     get:
       deprecated: true
+      tags:
+        - Applications
+      security:
+        - ApiKey: []
       description: (Admin) Get app details
       responses:
         200:
@@ -74,6 +78,10 @@ paths:
     put:
       summary: (Admin) Create or update application
       description: Create a new application or update an existing one
+      tags:
+        - Applications
+      security:
+        - ApiKey: []
       requestBody:
         description: Application details
         content:
@@ -190,6 +198,7 @@ paths:
         schema:
           type: string
     post:
+      summary: Validate by key
       description: Validate an API key and get user information
       tags:
         - User validation
@@ -220,6 +229,45 @@ paths:
                   items:
                     $ref: '#/components/schemas/ItemRoles'
 
+  /apps/{appId}/userinfo:
+    parameters:
+      - name: appId
+        description: The identifier of the application
+        in: path
+        schema:
+          type: string
+    post:
+      summary: Validate by username
+      description: Validate that a username is known to the application, and get associated permissions.
+      tags:
+        - User validation
+      security:
+        - ApiKey: []
+      requestBody:
+        description: User information
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "john.doe@example.com"
+      responses:
+        200:
+          description: Username known to this application, user info retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    default: success
+                  userData:
+                    $ref: '#/components/schemas/UserMinimal'
+                  items:
+                    $ref: '#/components/schemas/ItemRoles'
 
   /apps/{appId}/invitations:
     parameters:
