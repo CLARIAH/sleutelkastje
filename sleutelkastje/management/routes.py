@@ -5,8 +5,9 @@ from flask_login import current_user, login_required
 from gunicorn.http import body
 
 from sleutelkastje.application import db
-from sleutelkastje.authentication import auth, get_user_by_key, permission
-from sleutelkastje.management import Invitation, Item, UserItemAssociation, bp, get_invite, is_func, key_valid
+from sleutelkastje.authentication import User, auth, get_user_by_key, permission
+from sleutelkastje.management import Invitation, Item, UserItemAssociation, application_user_data, bp, get_invite, \
+    is_func, key_valid
 from sleutelkastje.sysop import Application, ApplicationUserAssociation
 
 
@@ -222,29 +223,47 @@ def register(invitation_id: str):
 @bp.route('/<appl>/validate', methods=['POST'])
 @login_required
 @permission(check_func, 'appl')
-def post_appl(appl: str):
-    key = request.values["key"]
-    logging.debug(f'key: {key}')
+def validate_key(appl: str):
+    data = request.get_json()
+    if 'key' not in data:
+        return jsonify({'success': False, 'error': 'No key provided'}), 400
 
+    key = data['key']
     application = db.session.query(Application).filter_by(mnemonic=appl).first()
 
     user = get_user_by_key(key)
 
-    if user is None:
-        return jsonify({
-            'status': 'unauthorized',
-            'message': 'submitted API key is not known',
-        }), 200
-
-    for app_assoc in user.application_associations:
-        if app_assoc.app_id == application.id:
+    if user is not None:
+        userdata, success = application_user_data(application, user)
+        if success:
             return jsonify({
                 "status": "success",
-                "userData": {
-                    "username": user.username,
-                    "nickname": user.nickname,
-                    "role": app_assoc.role
-                }
+                **userdata,
+            })
+
+    return jsonify({
+        'status': 'unauthorized',
+        'message': 'submitted API key is not known',
+    }), 200
+
+
+@bp.route('/<appl>/userinfo', methods=['POST'])
+@login_required
+@permission(check_func, 'appl')
+def check_userinfo(appl: str):
+    data = request.get_json()
+    if 'username' not in data:
+        return jsonify({'success': False, 'error': 'No key provided'}), 400
+    username = data['username']
+    user = db.session.query(User).filter_by(username=username).first()
+    application = db.session.query(Application).filter_by(mnemonic=appl).first()
+
+    if user is not None:
+        userdata, success = application_user_data(application, user)
+        if success:
+            return jsonify({
+                "status": "success",
+                **userdata,
             })
 
     return jsonify({

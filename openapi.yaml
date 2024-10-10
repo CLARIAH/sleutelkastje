@@ -79,6 +79,48 @@ paths:
         content:
           application/json:
             schema:
+              type: object
+              properties:
+                credentials:
+                  type: string
+                redirect:
+                  type: string
+                name:
+                  type: string
+      responses:
+        200:
+          description: Application updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    default: "updated"
+                  message:
+                    type: string
+                    default: "Application updated"
+                  application:
+                    type: string
+        201:
+          description: Application created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    default: "created"
+                  message:
+                    type: string
+                    default: "Application created"
+                  application:
+                    type: string
+                  invitation:
+                    description: Invitation with role 'operator' for the new application
+                    type: string
 
 
   /apps/{appId}/items:

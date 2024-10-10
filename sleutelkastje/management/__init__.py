@@ -13,5 +13,5 @@ bp = Blueprint(
 )
 
 from sleutelkastje.management.models import *
-from sleutelkastje.management.management import is_func, get_invite, key_valid
+from sleutelkastje.management.management import is_func, get_invite, key_valid, application_user_data
 from sleutelkastje.management import routes
