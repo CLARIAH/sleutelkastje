@@ -16,7 +16,7 @@ class SysopSeeder(Seeder):
                 nickname='System Administrator',
                 role='sysop',
                 user_info={},
-                password_hash=hash_password("striktgeheim"),
+                password_hash=hash_password("change-me-please"),
                 profile_complete=True,
                 is_oidc=False
             )

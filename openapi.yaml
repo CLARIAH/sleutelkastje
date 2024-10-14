@@ -434,6 +434,40 @@ paths:
       responses:
         200:
           description: Success
+  /api/auth/change-password:
+    post:
+      security:
+        - ApiKey: []
+      tags:
+        - User data
+      summary: Change password
+      description: Change your user account password
+      requestBody:
+        description: Old and new password
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                oldPassword:
+                  type: string
+                newPassword:
+                  type: string
+      responses:
+        200:
+          description: Password changed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    default: "success"
+                  message:
+                    type: string
+                    default: "Password changed"
+
 
   /api/keys:
     get:

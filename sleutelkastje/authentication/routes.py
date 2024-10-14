@@ -89,6 +89,41 @@ def complete_profile():
     }), 200
 
 
+@bp.route('/api/auth/change-password', methods=['POST'])
+@login_required
+def change_password():
+    """
+    Change the user password
+    :return:
+    """
+    if current_user.is_oidc:
+        return jsonify({
+            "status": "error",
+            "message": "You have an OIDC account. You cannot change your password in here, change it in the OIDC "
+                       "settings"
+        }), 403
+
+    data = request.json
+    if not all(x in data for x in ['oldPassword', 'newPassword']):
+        return jsonify({
+            "status": "error",
+            "message": "Incorrect arguments. Please make sure your body contains 'oldPassword' and 'newPassword'."
+        }), 400
+
+    if not verify_password(current_user.username, data['oldPassword']):
+        return jsonify({
+            "status": "error",
+            "message": "Incorrect old password"
+        }), 403
+
+    current_user.password_hash = hash_password(data['newPassword'])
+    db.session.commit()
+    return jsonify({
+        "status": "success",
+        "message": "Password changed"
+    }), 200
+
+
 @bp.route('/api/keys', methods=['GET'])
 @login_required
 def get_api_keys():
