@@ -34,6 +34,17 @@ class Application(db.Model):
     users: orm.Mapped[List['User']] = orm.relationship(secondary="application_user_association", back_populates="applications")
     user_associations: orm.Mapped[List[ApplicationUserAssociation]] = orm.relationship(back_populates="application")
 
+    def to_dict(self) -> dict:
+        """
+        Represent this application as a dictionary.
+        :return:
+        """
+        return {
+            'id': self.id,
+            'mnemonic': self.mnemonic,
+            'name': self.name,
+        }
+
     def __repr__(self):
         return f'<Application {self.mnemonic}>'
 

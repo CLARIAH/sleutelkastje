@@ -7,6 +7,7 @@ from sleutelkastje.application import db
 from sleutelkastje.authentication import User, bp, oidc_auth, verify_password
 from sleutelkastje.authentication.authentication import get_api_key, hash_password, load_user
 from sleutelkastje.authentication.models import Key
+from sleutelkastje.sysop import Application, ApplicationUserAssociation
 
 
 @bp.route('/api/auth/me', methods=['GET'])
@@ -135,6 +136,7 @@ def get_api_keys():
     return jsonify({
         "keys": [{
             "name": key.name,
+            "application": key.application.name if key.application is not None else 'Sleutelkastje',
             "readable_part": f"huc:{key.key_prefix}",
             "last_used": key.last_used,
         } for key in keys]
@@ -150,15 +152,32 @@ def generate_api_key():
     """
     data = request.json
     key_name = data['name']
+    application_mnemonic = data.get('appMnemonic', None)
 
     prefix, key_raw = get_api_key()
-
     key = Key(
         name=key_name,
         key_hash=hash_password(key_raw),
         key_prefix=prefix,
         user=current_user,
     )
+
+    if application_mnemonic not in [None, '']:
+        # Validate if the user has access to the application
+        application = db.session.query(Application).filter_by(mnemonic=application_mnemonic).first()
+        if application is None:
+            return jsonify({
+                'status': 'error',
+                'message': 'Invalid application'
+            }), 400
+        application_association = (db.session.query(ApplicationUserAssociation)
+                                   .filter_by(app_id=application.id, user_id=current_user.id)).one_or_none()
+        if application_association is None:
+            return jsonify({
+                'status': 'error',
+                'message': 'Cannot create key for an application you cannot access'
+            }), 403
+        key.application_id = application.id
 
     db.session.add(key)
     db.session.commit()

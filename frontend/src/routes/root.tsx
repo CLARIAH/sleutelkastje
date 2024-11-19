@@ -250,12 +250,6 @@ export function Root() {
                             borderColor: 'divider',
                         }}
                     >
-                        {/*<Avatar*/}
-                        {/*    sizes="small"*/}
-                        {/*    alt={userData.nickname}*/}
-                        {/*    src="/static/images/avatar/7.jpg"*/}
-                        {/*    sx={{ width: 36, height: 36 }}*/}
-                        {/*/>*/}
                         <Box sx={{ mr: 'auto' }}>
                             <Typography variant="body2" sx={{ fontWeight: 500, lineHeight: '16px' }}>
                                 {userData.nickname}
@@ -284,7 +278,7 @@ export function Root() {
                             mt: { xs: 8, md: 0 },
                         }}
                     >
-                        <Outlet />
+                        <Outlet context={{apps: apps}} />
                     </Stack>
                 </Box>
             </Box>

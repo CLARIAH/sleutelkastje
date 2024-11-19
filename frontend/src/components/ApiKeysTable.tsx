@@ -1,5 +1,6 @@
 import {DataGrid, GridColDef, GridRowId, GridRowSelectionModel, GridToolbarContainer} from "@mui/x-data-grid";
 import {
+    Autocomplete,
     Box,
     Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,
     FormControl, IconButton, Input, InputAdornment,
@@ -20,14 +21,16 @@ import axios from "axios";
 import moment from 'moment'
 import {useRevalidator} from "react-router-dom";
 import {ConfirmDialog} from "./ConfirmDialog.tsx";
+import {IApp} from "../routes/root.tsx";
 
 const columns: GridColDef[] = [
     {field: 'name', headerName: 'Name', width: 200},
+    {field: 'application', headerName: 'Application', width: 200},
     {
         field: 'key',
         headerName: 'Key',
-        width: 650,
-        valueGetter: (_value, row) => row.readable_part + '************************************************',
+        width: 260,
+        valueGetter: (_value, row) => row.readable_part + '*****',
         renderCell: params => {
             return <span style={{
                 fontFamily: "Victor Mono",
@@ -47,14 +50,17 @@ const modalStyle = {
     width: 600,
 }
 
-export function ApiKeysTable({keys}: {keys: IApiKey[]}) {
+export function ApiKeysTable({keys, apps}: {keys: IApiKey[], apps: IApp[]}) {
     const [showModal, setShowModal] = useState<boolean>(false);
     const [rowSelection, setRowSelection] = useState<GridRowSelectionModel>([])
     const [activeTab, setActiveTab] = useState(0)
     const [keyName, setKeyName] = useState<string>('')
     const [displayKey, setDisplayKey] = useState<string>('')
     const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+    const [selectedApp, setSelectedApp] = useState<IApp | null>(null)
     const revalidator = useRevalidator()
+
+    const appsList: IApp[] = [{name: 'Sleutelkastje', mnemonic: '', current_role: ''}, ...apps]
 
 
     function deleteKeys() {
@@ -80,12 +86,18 @@ export function ApiKeysTable({keys}: {keys: IApiKey[]}) {
     function createKey(e: { preventDefault: () => void; }) {
         e.preventDefault()
 
-        axios.post('/api/keys', {
+        let postData: {name: string, appMnemonic?: string} = {
             name: keyName
-        }).then(response => {
+        }
+        if (selectedApp != null) {
+            postData.appMnemonic = selectedApp.mnemonic
+        }
+
+        axios.post('/api/keys', postData).then(response => {
             console.log(response)
             setDisplayKey(response.data.key)
             setActiveTab(1)
+            setSelectedApp(null)
             revalidator.revalidate()
         })
     }
@@ -112,6 +124,15 @@ export function ApiKeysTable({keys}: {keys: IApiKey[]}) {
                             gap: 2
                         }}>
                             <TextField id={"invitationRole"} value={keyName} onChange={e => setKeyName(e.target.value)} label={"Name"} variant={"standard"} />
+                            <Autocomplete
+                                renderInput={(params) => (
+                                    <TextField {...params} label={'App'} variant={'standard'} />
+                                )}
+                                getOptionLabel={(option) => option.name}
+                                options={appsList}
+                                value={selectedApp}
+                                onChange={(_e, newValue) => setSelectedApp(newValue)}
+                                />
                         </Box>
                     </DialogContent>
                     <DialogActions>

@@ -4,6 +4,7 @@ import re
 import secrets
 from datetime import datetime
 from sys import platform
+from typing import Optional
 
 from flask_login import LoginManager
 
@@ -53,7 +54,7 @@ def load_user_from_request(request):
         if not api_key.startswith('Bearer huc:'):
             return None
         api_key = api_key.replace('Bearer ', '', 1)
-        user = get_user_by_key(api_key)
+        user = get_user_by_key(api_key, None)
         return user
 
     return None
@@ -71,11 +72,19 @@ def get_user_roles(user):
     return user.role
 
 
-def get_user_by_key(api_key: str):
+def get_user_by_key(api_key: str, application_id) -> Optional[User]:
+    """
+    Get user by API key. Only keys which are not bound to an application can be used for managing the
+    sleutelkastje itself and thus used for authentication. Application keys can only be used for
+    authenticating to that application.
+    :param application_id: Application ID or None
+    :param api_key:
+    :return: User or None
+    """
     prefix = api_key[4:20]
 
     key = db.session.query(Key).filter(Key.key_prefix == prefix).one_or_none()
-    if key is not None and check_password_hash(key.key_hash, api_key):
+    if key is not None and key.application_id == application_id and check_password_hash(key.key_hash, api_key):
         key.last_used = datetime.now()
         db.session.commit()
         return key.user

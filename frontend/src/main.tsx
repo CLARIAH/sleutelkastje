@@ -19,6 +19,7 @@ import {ApplicationItems, itemsLoader} from "./routes/appManagement/applicationI
 import {Invitation, invitationLoader} from "./routes/invitation.tsx";
 import {ApiKeys, apiKeysLoader} from "./routes/user/apiKeys.tsx";
 import {getBackendBase} from "./config.ts";
+import {Profile} from "./routes/user/profile.tsx";
 
 
 axios.defaults.baseURL = getBackendBase()
@@ -69,6 +70,10 @@ const router = createBrowserRouter([
                 path: "/keys",
                 element: <ApiKeys />,
                 loader: apiKeysLoader,
+            },
+            {
+                path: "/profile",
+                element: <Profile />,
             }
         ]
     }

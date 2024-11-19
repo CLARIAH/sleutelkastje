@@ -1,7 +1,8 @@
 import {Box, Typography} from "@mui/material";
 import axios from "axios";
-import {useLoaderData} from "react-router-dom";
+import {useLoaderData, useOutletContext} from "react-router-dom";
 import {ApiKeysTable} from "../../components/ApiKeysTable.tsx";
+import {IApp} from "../root.tsx";
 
 
 export interface IApiKey {
@@ -21,15 +22,14 @@ export async function apiKeysLoader() {
 export function ApiKeys() {
 
     const {keys} = useLoaderData() as IApiKeysLoaderResult
-
-    console.log("Keys", keys)
+    const {apps} = useOutletContext() as {apps: IApp[]}
 
     return <>
         <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
             <Typography component="h2" variant="h2" sx={{mb: 2}}>
                 Manage API keys
             </Typography>
-            <ApiKeysTable keys={keys} />
+            <ApiKeysTable keys={keys} apps={apps} />
         </Box>
     </>
 }

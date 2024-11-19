@@ -231,7 +231,7 @@ def validate_key(appl: str):
     key = data['key']
     application = db.session.query(Application).filter_by(mnemonic=appl).first()
 
-    user = get_user_by_key(key)
+    user = get_user_by_key(key, application.id)
 
     if user is not None:
         userdata, success = application_user_data(application, user)

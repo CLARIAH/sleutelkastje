@@ -11,7 +11,7 @@ import {
 import {LogoutRounded, MoreVertRounded} from "@mui/icons-material";
 import {useState} from "react";
 import axios from "axios";
-import {useNavigate} from "react-router-dom";
+import {NavLink, useNavigate} from "react-router-dom";
 
 const MenuItem = styled(MuiMenuItem)({
     margin: '2px 0',
@@ -68,7 +68,10 @@ export function UserMenu() {
                 },
             }}
         >
-            <MenuItem onClick={handleClose}>Profile</MenuItem>
+            {
+                // @ts-ignore
+                <MenuItem to={'/profile'} component={NavLink} onClick={handleClose}>Profile</MenuItem>
+            }
             <MenuItem onClick={handleClose}>Settings</MenuItem>
             <Divider />
             <MenuItem

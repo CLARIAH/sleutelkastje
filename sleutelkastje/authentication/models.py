@@ -74,6 +74,8 @@ class Key(db.Model):
     key_hash: orm.Mapped[str] = orm.mapped_column(unique=True)
     key_prefix: orm.Mapped[str] = orm.mapped_column(unique=True, index=True)
     user_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey('user.id'))
+    application_id: orm.Mapped[int] = orm.mapped_column(sa.ForeignKey('application.id'), nullable=True)
     last_used: orm.Mapped[datetime] = orm.mapped_column(nullable=True)
 
     user: orm.Mapped['User'] = orm.relationship(back_populates="keys")
+    application: orm.Mapped['Application'] = orm.relationship()

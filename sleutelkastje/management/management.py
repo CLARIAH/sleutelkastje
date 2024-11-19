@@ -15,7 +15,15 @@ alphabet = letters + digits + special_chars
 
 
 def is_func(app: str, user_id: int) -> bool:
+    """
+    Permission check for 'functional admin' i.e. operator of an app
+    :param app:
+    :param user_id:
+    :return:
+    """
     application = db.session.query(Application).filter_by(mnemonic=app).first()
+    if application is None:
+        return False
     application_association = (db.session.query(ApplicationUserAssociation)
                                .filter_by(app_id=application.id, user_id=user_id)).one_or_none()
 

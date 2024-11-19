@@ -502,10 +502,14 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - name
               properties:
                 name:
                   description: Name by which to identify this key
                   type: string
+                appMnemonic:
+                  description: Mnemonic of the app this key is for. Leave this empty or omit the field if you need a key for interacting with the Sleutelkastje API itself
       responses:
         201:
           description: Success and API key
@@ -591,6 +595,10 @@ components:
       properties:
         name:
           type: string
+          example: My API key
+        application:
+          type: string
+          example: Sleutelkastje
         readable_part:
           type: string
           pattern: '^huc:.{16}'
