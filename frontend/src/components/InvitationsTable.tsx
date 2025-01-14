@@ -90,9 +90,7 @@ export function InvitationsTable({app, invitations, items}: {app: IApp, invitati
 
     function deleteInvitations() {
         axios.post('/api/apps/' + app.mnemonic + '/invitations/bulk-delete', {
-            data: {
-                ids: rowSelection,
-            }
+            ids: rowSelection,
         }).then((_response) => {
             revalidator.revalidate()
         })

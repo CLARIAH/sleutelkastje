@@ -69,9 +69,7 @@ export function ApiKeysTable({keys, apps}: {keys: IApiKey[], apps: IApp[]}) {
         })
 
         axios.post('/api/keys/bulk-delete', {
-            data: {
-                'prefixes': prefixes
-            }
+            'prefixes': prefixes
         }).then(response => {
             console.log(response.data)
             closeDeleteDialog()

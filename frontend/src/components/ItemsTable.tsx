@@ -39,9 +39,7 @@ export function ItemsTable({app, items}: {app: IApp, items: IItem[]}) {
 
     function deleteItems() {
         axios.post('/api/apps/' + app.mnemonic + '/items/bulk-delete', {
-            data: {
-                ids: rowSelection,
-            }
+            ids: rowSelection,
         }).then((_response) => {
             closeDeleteDialog()
             revalidator.revalidate()
