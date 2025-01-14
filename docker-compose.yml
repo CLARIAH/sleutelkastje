@@ -88,7 +88,7 @@ services:
     networks:
       - sleutelkast_network
 
-  db:
+
     build:
       context: .
       dockerfile: Dockerfile-psql

@@ -47,6 +47,7 @@ paths:
       parameters:
         - name: appId
           description: The identifier of the application
+          required: true
           in: path
           schema:
             type: string
@@ -61,6 +62,7 @@ paths:
   /admin/apps/{appId}:
     parameters:
       - name: appId
+        required: true
         description: The identifier of the application
         in: path
         schema:
@@ -134,6 +136,7 @@ paths:
   /apps/{appId}/items:
     parameters:
       - name: appId
+        required: true
         description: The identifier of the application
         in: path
         schema:
@@ -190,9 +193,61 @@ paths:
                   item:
                     $ref: '#/components/schemas/Item'
 
+
+  /apps/{appId}/items/bulk-delete:
+    parameters:
+      - name: appId
+        required: true
+        description: The identifier of the application
+        in: path
+        schema:
+          type: string
+    post:
+      description: Bulk delete items for an application
+      security:
+        - ApiKey: []
+      tags:
+        - Items
+      requestBody:
+        description:
+          Items to delete
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        200:
+          description: Items deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+        400:
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: false
+                  error:
+                    type: string
+                    example: "No IDs provided"
   /apps/{appId}/validate:
     parameters:
       - name: appId
+        required: true
         description: The identifier of the application
         in: path
         schema:
@@ -232,6 +287,7 @@ paths:
   /apps/{appId}/userinfo:
     parameters:
       - name: appId
+        required: true
         description: The identifier of the application
         in: path
         schema:
@@ -272,6 +328,7 @@ paths:
   /apps/{appId}/invitations:
     parameters:
       - name: appId
+        required: true
         description: The identifier of the application
         in: path
         schema:
@@ -321,8 +378,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Invitation'
-    delete:
-      description: Delete invitations for an application
+  /apps/{appId}/invitations/bulk-delete:
+    parameters:
+      - name: appId
+        required: true
+        description: The identifier of the application
+        in: path
+        schema:
+          type: string
+    post:
+      description: Bulk delete invitations for an application
       security:
         - ApiKey: []
       tags:
@@ -364,6 +429,13 @@ paths:
                     type: string
                     example: "No IDs provided"
   /invitations/{invitationId}:
+    parameters:
+      - name: invitationId
+        required: true
+        description: The identifier of the invitation
+        in: path
+        schema:
+          type: string
     get:
       security:
         - ApiKey: []
@@ -583,6 +655,7 @@ components:
         'data-story-1': user
         'data-story-2': owner
     Item:
+      description: An object containing an item
       type: object
       properties:
         id:

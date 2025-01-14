@@ -38,9 +38,14 @@ export function ItemsTable({app, items}: {app: IApp, items: IItem[]}) {
     }
 
     function deleteItems() {
-        console.log("Deleting:", rowSelection)
-        closeDeleteDialog()
-        revalidator.revalidate()
+        axios.post('/api/apps/' + app.mnemonic + '/items/bulk-delete', {
+            data: {
+                ids: rowSelection,
+            }
+        }).then((_response) => {
+            closeDeleteDialog()
+            revalidator.revalidate()
+        })
     }
 
     function createItem(e: { preventDefault: () => void; }) {

@@ -55,6 +55,8 @@ def get_app():
     #eptid = ''
     eppn = ''
     user_session = UserSession(flask.session, 'default')
+    sk_api_key = os.environ.get('SK_API_KEY')
+    sk_domain = os.environ.get('SK_DOMAIN')
     if user_session.last_authenticated is not None:
         userinfo = user_session.userinfo
         #eptid = userinfo['edupersontargetedid'][0]
@@ -63,11 +65,14 @@ def get_app():
     else:
         token = request.headers['Authorization'].replace("Bearer", "").strip()
         logging.debug(f'token: {token}')
-        response = requests.post('https://sleutelkast.sd.di.huc.knaw.nl/todo', auth=('todo', 'ookgeheim'),
-                                 data={"key": token})
+        response = requests.post(f'{sk_domain}/api/apps/todo/validate', headers={
+            'Authorization': f'Bearer {sk_api_key}',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        }, json={"key": token})
         #eptid = response.json()['edupersontargetedid'][0]
         try:
-            eppn = response.json()['eppn'][0]
+            eppn = response.json()['userData']['username']
         except:
             return make_response('Unauthorized', 401)
     #logging.debug(f'eptid: {eptid}')

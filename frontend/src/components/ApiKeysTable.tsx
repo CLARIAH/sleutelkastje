@@ -68,7 +68,7 @@ export function ApiKeysTable({keys, apps}: {keys: IApiKey[], apps: IApp[]}) {
             return (withHuc as string).substring('huc:'.length)
         })
 
-        axios.delete('/api/keys', {
+        axios.post('/api/keys/bulk-delete', {
             data: {
                 'prefixes': prefixes
             }
