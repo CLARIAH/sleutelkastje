@@ -36,7 +36,9 @@ services:
       APP_DOMAIN: "http://localhost:3011"
       OIDC_SERVER: "https://testauthentication.di.huc.knaw.nl"
       OIDC_CLIENT_ID: "nl_knaw_huc_di_sd_todo" 
-      OIDC_CLIENT_SECRET: "5RKBN2siBqLq9MUHXlKZ" 
+      OIDC_CLIENT_SECRET: "5RKBN2siBqLq9MUHXlKZ"
+      SK_API_KEY: "huc:)AsBWz}-s`buxM#68YB##Ogs-&pxdb*/Rg]5]PM+-Q>454*ok_Bar%~F9+kKjsns"
+      SK_DOMAIN: "http://sleutelkastje:5000"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sleutelkast-todo.entrypoints=http"

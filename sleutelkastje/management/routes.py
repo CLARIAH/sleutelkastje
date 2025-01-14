@@ -2,12 +2,11 @@ import logging
 
 from flask import jsonify, make_response, request
 from flask_login import current_user, login_required
-from gunicorn.http import body
 
 from sleutelkastje.application import db
-from sleutelkastje.authentication import User, auth, get_user_by_key, permission
-from sleutelkastje.management import Invitation, Item, UserItemAssociation, application_user_data, bp, get_invite, \
-    is_func, key_valid
+from sleutelkastje.authentication import User, get_user_by_key, permission
+from sleutelkastje.management import Invitation, Item, application_user_data, bp, get_invite, \
+    is_func
 from sleutelkastje.sysop import Application, ApplicationUserAssociation
 
 
@@ -90,7 +89,7 @@ def get_invites(app):
     }))
 
 
-@bp.route('/<app>/invitations', methods=['DELETE'])
+@bp.route('/<app>/invitations/bulk-delete', methods=['POST'])
 @login_required
 @permission(check_func, 'app')
 def delete_invitations(app):
@@ -312,3 +311,28 @@ def create_item(app: str):
     db.session.commit()
 
     return jsonify({'success': True, 'message': 'Item created', 'item': item.to_dict()}), 201
+
+
+@bp.route('/<app>/items/bulk-delete', methods=['POST'])
+@login_required
+@permission(check_func, 'app')
+def delete_items(app: str):
+    """
+    Bulk delete items for this application.
+    :param app:
+    :return:
+    """
+    application = db.session.query(Application).filter_by(mnemonic=app).first()
+    body = request.get_json()
+
+    if 'ids' not in body:
+        return jsonify({'success': False, 'error': 'No IDs provided'}), 400
+
+    ids = body['ids']
+
+    items = db.session.query(Item).filter(Item.id.in_(ids), Item.app_id == application.id).all()
+    for item in items:
+        db.session.delete(item)
+    db.session.commit()
+
+    return jsonify({'success': True}), 200

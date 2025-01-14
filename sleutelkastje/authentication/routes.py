@@ -80,7 +80,6 @@ def complete_profile():
         }), 403
 
     data = request.json
-    nickname = data['nickname']
 
     current_user.profile_complete = True
     current_user.nickname = data['nickname']
@@ -187,7 +186,7 @@ def generate_api_key():
     }), 201
 
 
-@bp.route('/api/keys', methods=['DELETE'])
+@bp.route('/api/keys/bulk-delete', methods=['POST'])
 @login_required
 def delete_api_keys():
     """
