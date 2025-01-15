@@ -377,7 +377,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Invitation'
+                type: object
+                properties:
+                  application:
+                    type: string
+                    example: data-stories
+                  inviteId:
+                    description: The unique identifier of this invitation
+                    type: string
+
   /apps/{appId}/invitations/bulk-delete:
     parameters:
       - name: appId
@@ -454,7 +462,8 @@ paths:
         - ApiKey: []
       tags:
         - Invitations
-      description: Accept or reject an invitation
+      summary: Accept or reject an invitation
+      description: Accept or reject an invitation. Note that this is used by the Sleutelkastje front-end. You should not need this endpoint, as the user will accept or reject the invitation through the front-end after opening the invitation URL.
       requestBody:
         description: Action to perform
         content:
